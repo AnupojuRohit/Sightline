@@ -1,6 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -12,3 +12,8 @@ class Task:
     priority: str
     due_date: Optional[datetime]
     blocked_by: list[str]
+    description: Optional[str] = None
+    list_id: Optional[str] = None
+    item_id: Optional[str] = None
+    url: Optional[str] = None
+    raw_fields: dict[str, Any] = field(default_factory=dict)
