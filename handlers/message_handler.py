@@ -1,8 +1,2 @@
-import json
-
-
 def handle_message(event, logger):
-    logger.info("MESSAGE EVENT")
-
-    print("\n===== MESSAGE EVENT =====")
-    print(json.dumps(event, indent=2))
+    logger.debug("message_event_ignored", extra={"event_type": event.get("type")})

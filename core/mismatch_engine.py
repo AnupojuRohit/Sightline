@@ -1,4 +1,5 @@
 import logging
+import inspect
 
 from core.evidence_builder import EvidenceBuilder
 from models.mismatch import EvidenceBundle, GitHubState, Mismatch, RTSEvidence
@@ -14,16 +15,30 @@ class MismatchEngine:
     def __init__(self, evidence_builder: EvidenceBuilder):
         self.evidence_builder = evidence_builder
 
-    def find_mismatches(self, tasks: list[Task]) -> list[Mismatch]:
+    def find_mismatches(self, tasks: list[Task], user_id: str | None = None) -> list[Mismatch]:
+        logger.info(
+            "mismatch_engine_entered task_count=%s user_id_present=%s",
+            len(tasks),
+            bool(user_id),
+            extra={"task_count": len(tasks), "user_id_present": bool(user_id)},
+        )
         mismatches: list[Mismatch] = []
+        build_signature = inspect.signature(self.evidence_builder.build)
+        supports_user_id = "user_id" in build_signature.parameters
 
         for task in tasks:
-            evidence = self.evidence_builder.build(task)
+            if supports_user_id:
+                evidence = self.evidence_builder.build(task, user_id=user_id)
+            else:
+                evidence = self.evidence_builder.build(task)
             task_mismatches = self._evaluate_task(task, evidence)
             mismatches.extend(task_mismatches)
 
             logger.info(
-                "mismatch_result",
+                "mismatch_result task_id=%s status=%s mismatch_count=%s",
+                task.id,
+                task.status,
+                len(task_mismatches),
                 extra={
                     "task_id": task.id,
                     "status": task.status,
@@ -31,6 +46,7 @@ class MismatchEngine:
                 },
             )
 
+        logger.info("mismatch_engine_complete task_count=%s mismatch_count=%s", len(tasks), len(mismatches), extra={"task_count": len(tasks), "mismatch_count": len(mismatches)})
         return mismatches
 
     def _evaluate_task(self, task: Task, evidence: EvidenceBundle) -> list[Mismatch]:

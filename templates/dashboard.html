@@ -1,0 +1,1112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sightline Demo Console</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17211d;
+      --muted: #66736e;
+      --line: #dbe2df;
+      --panel: #ffffff;
+      --page: #f6f7f4;
+      --green: #1f8a5b;
+      --green-soft: #dff3e9;
+      --red: #c44032;
+      --red-soft: #f8dfdc;
+      --amber: #bd7b16;
+      --amber-soft: #f9ebcf;
+      --blue: #286fbb;
+      --blue-soft: #dfeafa;
+      --shadow: 0 14px 34px rgba(35, 45, 40, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 0;
+      z-index: 3;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, #1f8a5b 0 48%, transparent 48%),
+        linear-gradient(315deg, #286fbb 0 44%, #f6c85f 44% 62%, #ffffff 62%);
+      border: 1px solid rgba(23, 33, 29, 0.14);
+      box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.65);
+      flex: 0 0 auto;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.1;
+      font-weight: 760;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 48vw;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-pill {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: var(--green);
+      box-shadow: 0 0 0 4px var(--green-soft);
+    }
+
+    .button {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 14px;
+      border: 1px solid #176d48;
+      border-radius: 8px;
+      background: var(--green);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(31, 138, 91, 0.2);
+    }
+
+    .list-input {
+      width: min(220px, 24vw);
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 0 10px;
+      font-size: 13px;
+    }
+
+    .button.secondary {
+      color: var(--ink);
+      background: #fff;
+      border-color: var(--line);
+      box-shadow: none;
+    }
+
+    .button-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 99px;
+      display: inline-grid;
+      place-items: center;
+      color: inherit;
+      border: 1px solid currentColor;
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .layout {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: 24px 28px 32px;
+      display: grid;
+      grid-template-columns: 310px minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .sidebar,
+    .main-grid,
+    .right-stack {
+      min-width: 0;
+    }
+
+    .sidebar {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .panel-header {
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 760;
+    }
+
+    .panel-kicker {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .score {
+      padding: 18px 16px 16px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .score-ring {
+      width: 168px;
+      aspect-ratio: 1;
+      margin: 0 auto;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at center, #fff 0 58%, transparent 59%),
+        conic-gradient(var(--green) calc(var(--score) * 1%), #e8ece9 0);
+      border: 1px solid var(--line);
+    }
+
+    .score-ring strong {
+      display: block;
+      font-size: 42px;
+      line-height: 1;
+    }
+
+    .score-ring span {
+      color: var(--muted);
+      font-size: 12px;
+      display: block;
+      margin-top: 4px;
+      text-align: center;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      min-height: 88px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfb;
+      display: grid;
+      align-content: space-between;
+      gap: 8px;
+    }
+
+    .metric b {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(330px, 0.65fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .scan-band {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      padding: 18px;
+      border-radius: 8px;
+      border: 1px solid #cbd7d1;
+      background:
+        linear-gradient(90deg, rgba(223, 243, 233, 0.95), rgba(255, 255, 255, 0.95)),
+        repeating-linear-gradient(135deg, rgba(31, 138, 91, 0.08) 0 1px, transparent 1px 18px);
+      box-shadow: var(--shadow);
+    }
+
+    .scan-band h2 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      line-height: 1.15;
+    }
+
+    .scan-band p {
+      margin: 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .signal-map {
+      min-width: 260px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .signal-node {
+      min-height: 48px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 740;
+      text-transform: uppercase;
+    }
+
+    .signal-node.active {
+      color: #0f5f3d;
+      background: var(--green-soft);
+      border-color: #b9dec9;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      font-size: 13px;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      background: #fbfcfb;
+      position: sticky;
+      top: 0;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .task-title {
+      font-weight: 760;
+      margin-bottom: 4px;
+    }
+
+    .task-desc {
+      color: var(--muted);
+      max-width: 360px;
+      line-height: 1.35;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 9px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      white-space: nowrap;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge.red {
+      background: var(--red-soft);
+      border-color: #efc4bf;
+      color: #8f241b;
+    }
+
+    .badge.green {
+      background: var(--green-soft);
+      border-color: #b9dec9;
+      color: #0f5f3d;
+    }
+
+    .badge.amber {
+      background: var(--amber-soft);
+      border-color: #efd49d;
+      color: #7b4a09;
+    }
+
+    .badge.blue {
+      background: var(--blue-soft);
+      border-color: #bed2ee;
+      color: #174e87;
+    }
+
+    .right-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .status-list {
+      display: grid;
+      gap: 8px;
+      padding: 12px 16px 16px;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfb;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .status-row b {
+      font-size: 13px;
+      font-weight: 740;
+    }
+
+    .feed-list {
+      display: grid;
+      gap: 8px;
+      padding: 12px 16px 16px;
+      max-height: 260px;
+      overflow: auto;
+    }
+
+    .feed-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfb;
+      padding: 10px 12px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .feed-item strong {
+      font-size: 12px;
+      font-weight: 760;
+    }
+
+    .feed-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .timeline {
+      padding: 4px 16px 16px;
+    }
+
+    .timeline-row {
+      display: grid;
+      grid-template-columns: 18px minmax(0, 1fr);
+      gap: 10px;
+      padding-top: 14px;
+    }
+
+    .timeline-pin {
+      width: 10px;
+      height: 10px;
+      border-radius: 99px;
+      background: var(--blue);
+      margin-top: 4px;
+      box-shadow: 0 0 0 4px var(--blue-soft);
+    }
+
+    .timeline-row h3 {
+      margin: 0 0 3px;
+      font-size: 13px;
+    }
+
+    .timeline-row p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .alert-preview {
+      padding: 16px;
+    }
+
+    .slack-card {
+      border: 1px solid #d8dee4;
+      border-left: 4px solid var(--red);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .slack-card h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+    }
+
+    .slack-line {
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr);
+      gap: 8px;
+      padding: 6px 0;
+      border-top: 1px solid #edf0ee;
+      font-size: 13px;
+    }
+
+    .slack-line:first-of-type {
+      border-top: 0;
+    }
+
+    .slack-line span {
+      color: var(--muted);
+    }
+
+    .evidence-list {
+      display: grid;
+      gap: 10px;
+      padding: 14px 16px 16px;
+    }
+
+    .evidence-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcfb;
+    }
+
+    .evidence-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .evidence-top b,
+    .evidence-item p {
+      min-width: 0;
+    }
+
+    .evidence-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    .risk-list {
+      display: grid;
+      gap: 10px;
+      padding: 14px 16px 16px;
+      max-height: 280px;
+      overflow: auto;
+    }
+
+    .risk-item {
+      display: grid;
+      gap: 6px;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfb;
+    }
+
+    .risk-item b {
+      font-size: 13px;
+    }
+
+    .risk-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-size: 13px;
+      padding: 16px;
+    }
+
+    .loading {
+      opacity: 0.64;
+    }
+
+    @media (max-width: 1080px) {
+      .layout,
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      }
+
+      .scan-band {
+        grid-template-columns: 1fr;
+      }
+
+      .signal-map {
+        min-width: 0;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .topbar {
+        height: auto;
+        align-items: flex-start;
+        padding: 14px 16px;
+        gap: 12px;
+        flex-direction: column;
+      }
+
+      .toolbar {
+        width: 100%;
+      }
+
+      .button,
+      .list-input,
+      .status-pill {
+        flex: 1;
+      }
+
+      .layout {
+        padding: 16px;
+      }
+
+      .sidebar {
+        grid-template-columns: 1fr;
+      }
+
+      .metric-grid,
+      .signal-map {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .scan-band h2 {
+        font-size: 19px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div>
+          <h1>Sightline Demo Console</h1>
+          <p id="listLabel">Evidence-backed Slack List automation</p>
+        </div>
+      </div>
+      <div class="toolbar">
+        <div class="status-pill"><span class="dot" aria-hidden="true"></span><span id="scanState">Ready</span></div>
+        <input class="list-input" id="listIdInput" type="text" autocomplete="off" placeholder="Slack List ID">
+        <button class="button secondary" type="button" id="resetButton" title="Refresh real scan">
+          <span class="button-icon" aria-hidden="true">R</span>
+          Refresh
+        </button>
+        <button class="button" type="button" id="scanButton" title="Run the Sightline scan">
+          <span class="button-icon" aria-hidden="true">&gt;</span>
+          Run Scan
+        </button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Project Health</h2>
+              <p class="panel-kicker">Live demo metrics</p>
+            </div>
+            <span class="badge green" id="generatedAt">Now</span>
+          </div>
+          <div class="score">
+            <div class="score-ring" id="scoreRing" style="--score: 0">
+              <div>
+                <strong id="healthScore">0</strong>
+                <span>score</span>
+              </div>
+            </div>
+            <div class="metric-grid">
+              <div class="metric"><b id="totalTasks">0</b><span>Total tasks</span></div>
+              <div class="metric"><b id="staleTasks">0</b><span>Stale tasks</span></div>
+              <div class="metric"><b id="blockedTasks">0</b><span>Blocked</span></div>
+              <div class="metric"><b id="overdueTasks">0</b><span>Overdue</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Risks</h2>
+              <p class="panel-kicker">Classic project health signals</p>
+            </div>
+            <span class="badge amber" id="riskCount">0</span>
+          </div>
+          <div class="risk-list" id="riskList"></div>
+        </section>
+      </aside>
+
+      <section class="main-grid">
+        <div class="scan-band">
+          <div>
+            <h2>Slack List status checked against source-of-truth evidence.</h2>
+            <p>Sightline scans the active Slack List, GitHub issue/PR state, and Slack RTS evidence, then recommends only evidence-backed updates.</p>
+          </div>
+          <div class="signal-map" aria-label="Scan pipeline">
+            <div class="signal-node active">Slack List</div>
+            <div class="signal-node active">GitHub</div>
+            <div class="signal-node active">Slack RTS</div>
+            <div class="signal-node active">Action</div>
+          </div>
+        </div>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Task Review</h2>
+              <p class="panel-kicker">Current status vs Sightline recommendation</p>
+            </div>
+            <span class="badge blue" id="readiness">0% ready</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Task</th>
+                  <th>Owner</th>
+                  <th>Status</th>
+                  <th>Recommended</th>
+                  <th>Due</th>
+                  <th>Signal</th>
+                </tr>
+              </thead>
+              <tbody id="taskTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="right-stack">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">Integration Status</h2>
+                <p class="panel-kicker">Live readiness snapshot</p>
+              </div>
+            </div>
+            <div class="status-list" id="integrationStatus"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">Live Event Feed</h2>
+                <p class="panel-kicker">Context -> evidence -> action trail</p>
+              </div>
+              <span class="badge blue" id="lastEventAt">No events</span>
+            </div>
+            <div class="feed-list" id="eventFeed"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">Evidence Timeline</h2>
+                <p class="panel-kicker">What judges should see first</p>
+              </div>
+            </div>
+            <div class="timeline" id="timeline"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">Slack Alert Preview</h2>
+                <p class="panel-kicker">The in-channel action card</p>
+              </div>
+            </div>
+            <div class="alert-preview" id="alertPreview"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">Evidence Feed</h2>
+                <p class="panel-kicker">GitHub and Slack facts used by rules</p>
+              </div>
+            </div>
+            <div class="evidence-list" id="evidenceList"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const state = {
+      payload: null
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function badge(text, tone) {
+      return `<span class="badge ${tone || ""}">${escapeHtml(text)}</span>`;
+    }
+
+    function statusTone(status, isStale) {
+      const lowered = String(status || "").toLowerCase();
+      if (isStale) return "red";
+      if (lowered === "done" || lowered === "complete" || lowered === "completed") return "green";
+      if (lowered === "blocked") return "amber";
+      return "blue";
+    }
+
+    function render(payload) {
+      state.payload = payload;
+      const summary = payload.summary;
+
+      $("listLabel").textContent = `${payload.listId} - generated ${payload.generatedAt}`;
+      $("generatedAt").textContent = "Live";
+      $("healthScore").textContent = summary.healthScore;
+      $("scoreRing").style.setProperty("--score", summary.healthScore);
+      $("totalTasks").textContent = summary.totalTasks;
+      $("staleTasks").textContent = summary.staleTasks;
+      $("blockedTasks").textContent = summary.blockedTasks;
+      $("overdueTasks").textContent = summary.overdueTasks;
+      $("readiness").textContent = `${summary.automationReadiness}% ready`;
+      $("riskCount").textContent = payload.risks.length;
+
+      renderTasks(payload.tasks);
+      renderRisks(payload.risks);
+      renderTimeline(payload.timeline);
+      renderAlert(payload.alertPreview);
+      renderEvidence(payload.mismatches);
+      refreshHealthAndEvents();
+    }
+
+    function renderScanError(payload) {
+      $("scanState").textContent = payload?.message || payload?.error || "Scan failed";
+      $("listLabel").textContent = "Real scan unavailable";
+      $("generatedAt").textContent = "Check";
+      $("healthScore").textContent = "0";
+      $("scoreRing").style.setProperty("--score", 0);
+      $("totalTasks").textContent = "0";
+      $("staleTasks").textContent = "0";
+      $("blockedTasks").textContent = "0";
+      $("overdueTasks").textContent = "0";
+      $("readiness").textContent = "0% ready";
+      $("riskCount").textContent = "0";
+      $("taskTable").innerHTML = "";
+      $("riskList").innerHTML = `<div class="empty-state">${escapeHtml(payload?.message || payload?.error || "Unable to run scan.")}</div>`;
+      $("timeline").innerHTML = `<div class="empty-state">Run Scan requires a live Slack List ID.</div>`;
+      $("alertPreview").innerHTML = `<div class="empty-state">No alert preview until a real scan completes.</div>`;
+      $("evidenceList").innerHTML = `<div class="empty-state">No live evidence available.</div>`;
+      document.body.classList.remove("loading");
+      refreshHealthAndEvents();
+    }
+
+    function renderHealth(health) {
+      const rows = [
+        {
+          label: "Slack Bot/App",
+          ok: !!(health.slack?.botTokenPresent && health.slack?.appTokenPresent),
+          detail: health.slack?.botTokenPresent && health.slack?.appTokenPresent ? "Connected" : "Missing token env"
+        },
+        {
+          label: "GitHub Provider",
+          ok: !!health.github?.tokenPresent,
+          detail: health.github?.tokenPresent ? "Live provider ready" : "Token missing - fallback mode"
+        },
+        {
+          label: "RTS OAuth",
+          ok: !!health.rts?.oauthConfigured,
+          detail: health.rts?.oauthConfigured ? "Configured" : "OAuth env missing"
+        },
+        {
+          label: "RTS User Token",
+          ok: !!health.rts?.userTokenPresent,
+          detail: health.rts?.userTokenPresent ? "Token present" : "Authorize required"
+        },
+        {
+          label: "Slack Lists",
+          ok: !!health.lists?.defaultListIdPresent && !health.lists?.mockListsEnabled,
+          detail: health.lists?.mockListsEnabled ? "Mock mode enabled" : health.lists?.defaultListIdPresent ? "Live list configured" : "List ID required"
+        },
+        {
+          label: "List Updates",
+          ok: !!health.lists?.updatesEnabled,
+          detail: health.lists?.updatesEnabled ? "Enabled" : "Disabled"
+        }
+      ];
+
+      $("integrationStatus").innerHTML = rows.map((row) => `
+        <div class="status-row">
+          <b>${escapeHtml(row.label)}</b>
+          <span>${badge(row.detail, row.ok ? "green" : "amber")}</span>
+        </div>
+      `).join("");
+    }
+
+    function renderEvents(feed) {
+      const stats = feed?.stats || {};
+      const events = feed?.events || [];
+      $("lastEventAt").textContent = feed?.lastEventAt || "No events";
+
+      if (!events.length) {
+        $("eventFeed").innerHTML = `<div class="empty-state">No runtime events captured yet.</div>`;
+      } else {
+        $("eventFeed").innerHTML = events.map((event) => `
+          <article class="feed-item">
+            <strong>${escapeHtml(event.ts)} - ${escapeHtml(event.step)}</strong>
+            <p>${escapeHtml(event.detail)}</p>
+          </article>
+        `).join("");
+      }
+
+      if (state.payload) {
+        const resolved = Number(stats.updates_applied || 0) + Number(stats.dismissals || 0);
+        $("scanState").textContent = `${state.payload.summary.staleTasks} stale found | ${resolved} resolved`;
+      }
+    }
+
+    async function refreshHealthAndEvents() {
+      try {
+        const [healthRes, eventRes] = await Promise.all([
+          fetch("/api/health", { cache: "no-store" }),
+          fetch("/api/events", { cache: "no-store" })
+        ]);
+
+        if (healthRes.ok) {
+          renderHealth(await healthRes.json());
+        }
+        if (eventRes.ok) {
+          renderEvents(await eventRes.json());
+        }
+      } catch (_) {
+        // Keep the existing dashboard payload visible even if status polling fails.
+      }
+    }
+
+    function renderTasks(tasks) {
+      $("taskTable").innerHTML = tasks.map((task) => {
+        const signal = task.isStale ? "Stale" : task.blockedBy.length ? "Blocked" : "Clear";
+        const tone = statusTone(task.status, task.isStale);
+        return `
+          <tr>
+            <td>
+              <div class="task-title">${escapeHtml(task.title)}</div>
+              <div class="task-desc">${escapeHtml(task.description || "")}</div>
+            </td>
+            <td>${escapeHtml(task.owner)}</td>
+            <td>${badge(task.status, tone)}</td>
+            <td>${badge(task.recommendedStatus, task.isStale ? "green" : "")}</td>
+            <td>${escapeHtml(task.dueDate || "No date")}</td>
+            <td>${badge(signal, task.isStale ? "red" : task.blockedBy.length ? "amber" : "green")}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderRisks(risks) {
+      if (!risks.length) {
+        $("riskList").innerHTML = `<div class="empty-state">No project risks detected.</div>`;
+        return;
+      }
+
+      $("riskList").innerHTML = risks.map((risk) => `
+        <article class="risk-item">
+          <div class="evidence-top">
+            <b>${escapeHtml(risk.title)}</b>
+            ${badge(risk.severity, risk.severity === "HIGH" ? "red" : "amber")}
+          </div>
+          <p>${escapeHtml(risk.reason)} ${escapeHtml(risk.recommendation)}</p>
+        </article>
+      `).join("");
+    }
+
+    function renderTimeline(rows) {
+      $("timeline").innerHTML = rows.map((row) => `
+        <div class="timeline-row">
+          <span class="timeline-pin" aria-hidden="true"></span>
+          <div>
+            <h3>${escapeHtml(row.step)}</h3>
+            <p>${escapeHtml(row.detail)}</p>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderAlert(alert) {
+      if (!alert) {
+        $("alertPreview").innerHTML = `<div class="empty-state">No stale-task alert for this scan.</div>`;
+        return;
+      }
+
+      const evidence = alert.evidence.map((row) => `<div class="slack-line"><span>${escapeHtml(row.source)}</span><b>${escapeHtml(row.detail)}</b></div>`).join("");
+      $("alertPreview").innerHTML = `
+        <div class="slack-card">
+          <h3>${escapeHtml(alert.title)}</h3>
+          <div class="slack-line"><span>Task</span><b>${escapeHtml(alert.taskTitle)}</b></div>
+          <div class="slack-line"><span>Current</span><b>${escapeHtml(alert.currentStatus)}</b></div>
+          <div class="slack-line"><span>Recommended</span><b>${escapeHtml(alert.recommendedStatus)}</b></div>
+          <div class="slack-line"><span>Reason</span><b>${escapeHtml(alert.reason)}</b></div>
+          ${evidence}
+        </div>
+      `;
+    }
+
+    function renderEvidence(mismatches) {
+      const rows = mismatches.flatMap((mismatch) => mismatch.evidence.map((row) => ({
+        taskTitle: mismatch.taskTitle,
+        ...row
+      })));
+
+      if (!rows.length) {
+        $("evidenceList").innerHTML = `<div class="empty-state">No evidence rows available.</div>`;
+        return;
+      }
+
+      $("evidenceList").innerHTML = rows.map((row) => `
+        <article class="evidence-item">
+          <div class="evidence-top">
+            <b>${escapeHtml(row.source)}</b>
+            ${badge(row.taskTitle, row.source === "GitHub" ? "blue" : "green")}
+          </div>
+          <p><strong>${escapeHtml(row.label)}</strong></p>
+          <p>${escapeHtml(row.detail)}</p>
+        </article>
+      `).join("");
+    }
+
+    async function loadScan(showScanning) {
+      if (showScanning) {
+        $("scanState").textContent = "Scanning";
+        document.body.classList.add("loading");
+      }
+
+      const listId = $("listIdInput").value.trim();
+      const url = listId ? `/api/scan?list_id=${encodeURIComponent(listId)}` : "/api/scan";
+      const response = await fetch(url, { cache: "no-store" });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        renderScanError(payload);
+        return;
+      }
+
+      window.setTimeout(() => {
+        render(payload);
+        $("scanState").textContent = `${payload.summary.staleTasks} stale found`;
+        document.body.classList.remove("loading");
+      }, showScanning ? 450 : 0);
+    }
+
+    $("scanButton").addEventListener("click", () => loadScan(true));
+    $("resetButton").addEventListener("click", () => loadScan(false));
+    loadScan(false).catch(() => {
+      $("scanState").textContent = "API unavailable";
+    });
+    setInterval(() => {
+      refreshHealthAndEvents();
+    }, 2000);
+  </script>
+</body>
+</html>
