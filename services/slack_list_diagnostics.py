@@ -10,6 +10,9 @@ from slack_sdk.web.slack_response import SlackResponse
 
 SLACK_LIST_ID_RE = re.compile(r"\bF[A-Z0-9]{8,}\b")
 
+# Sentinel used to distinguish "attribute missing" from "attribute is None".
+_SENTINEL = object()
+
 
 def extract_slack_list_id(value: str | None) -> str | None:
     if not value:
@@ -21,24 +24,32 @@ def extract_slack_list_id(value: str | None) -> str | None:
 
 
 def diagnose_slack_list_reference(client: Any, reference: str | None) -> dict[str, Any]:
-    candidates = _candidate_ids(reference)
-    results: list[dict[str, Any]] = []
+    try:
+        candidates = _candidate_ids(reference)
+        results: list[dict[str, Any]] = []
 
-    for candidate in candidates:
-        results.append(_check_list_items(client, candidate))
-        results.append(_check_files_info(client, candidate))
+        for candidate in candidates:
+            results.append(_check_list_items(client, candidate))
+            results.append(_check_files_info(client, candidate))
 
-    return {
-        "input": reference,
-        "candidateIds": candidates,
-        "checks": results,
-        "filesList": _check_files_list(client),
-        "notes": [
-            "Slack SDK exposes slackLists.items.list for a known List ID.",
-            "The installed Slack SDK does not expose a Slack Lists enumerate/list-all method.",
-            "files.list/files.info require files:read and may identify F-prefixed objects when that scope is granted.",
-        ],
-    }
+        return {
+            "ok": True,
+            "input": reference,
+            "candidateIds": candidates,
+            "checks": results,
+            "filesList": _check_files_list(client),
+            "notes": [
+                "Slack SDK exposes slackLists.items.list for a known List ID.",
+                "The installed Slack SDK does not expose a Slack Lists enumerate/list-all method.",
+                "files.list/files.info require files:read and may identify F-prefixed objects when that scope is granted.",
+            ],
+        }
+    except Exception as exc:
+        return {
+            "ok": False,
+            "error": "diagnostics_failed",
+            "details": f"{type(exc).__name__}: {exc}",
+        }
 
 
 def _candidate_ids(reference: str | None) -> list[str]:
@@ -141,18 +152,63 @@ def _check_files_list(client: Any) -> dict[str, Any]:
 
 
 def _response_data(response: Any) -> dict[str, Any]:
-    if isinstance(response, Mapping):
-        return dict(response)
+    """Extract the JSON payload from *any* Slack SDK response type.
 
-    if isinstance(response, SlackResponse):
-        data = response.data
-        return data if isinstance(data, dict) else {"ok": False, "error": "invalid_slack_response_data"}
+    This function **never** calls ``dict(response)`` on a ``SlackResponse``
+    because ``SlackResponse.__iter__`` is a *pagination* iterator, not a
+    key iterator — ``dict()`` therefore raises ``ValueError`` / ``TypeError``.
 
-    data = getattr(response, "data", None)
-    if isinstance(data, dict):
-        return data
+    Handling order (intentional):
+    1. ``None`` — early-out so later attribute access is safe.
+    2. Plain ``dict`` — the most common case, returned as-is.
+    3. ``.data`` attribute (``SlackResponse`` and look-alikes) — the official
+       SDK way to access the JSON body.  Checked *before* the ``Mapping``
+       ABC because ``SlackResponse`` registers as a ``Mapping``.
+    4. ``Mapping`` that is **not** a ``SlackResponse`` — safe to convert
+       with ``dict()``.
+    5. Fallback — return a descriptive error dict.
 
-    return {"ok": False, "error": "unsupported_response_type", "details": type(response).__name__}
+    The entire body is wrapped in a blanket ``except Exception`` so that
+    this helper can **never** propagate an exception to the caller.
+    """
+    try:
+        # --- 1. None / missing ------------------------------------------------
+        if response is None:
+            return {"ok": False, "error": "no_response", "details": "response was None"}
+
+        # --- 2. Plain dict (most common for mocks / already-decoded) ----------
+        if isinstance(response, dict):
+            return response
+
+        # --- 3. SlackResponse or anything with a .data dict -------------------
+        #     Check the concrete type first, then fall back to duck-typing so
+        #     we also handle subclasses and third-party wrappers.
+        if isinstance(response, SlackResponse):
+            body = response.data
+            if isinstance(body, dict):
+                return body
+            return {"ok": False, "error": "invalid_slack_response_data",
+                    "details": f"SlackResponse.data was {type(body).__name__}, expected dict"}
+
+        data_attr = getattr(response, "data", _SENTINEL)
+        if data_attr is not _SENTINEL and isinstance(data_attr, dict):
+            return data_attr
+
+        # --- 4. Other Mapping (NOT SlackResponse) — safe to dict() ------------
+        if isinstance(response, Mapping):
+            try:
+                return dict(response)
+            except (ValueError, TypeError) as exc:
+                return {"ok": False, "error": "mapping_conversion_failed", "details": str(exc)}
+
+        # --- 5. Fallback ------------------------------------------------------
+        return {"ok": False, "error": "unsupported_response_type",
+                "details": type(response).__name__}
+
+    except Exception as exc:
+        # Blanket safety net — this function must *never* raise.
+        return {"ok": False, "error": "response_extraction_failed",
+                "details": f"{type(exc).__name__}: {exc}"}
 
 
 def _diagnostic_exception(mechanism: str, candidate_id: str | None, error: Exception) -> dict[str, Any]:

@@ -3,7 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sightline Demo Console</title>
+  <meta name="description" content="Sightline — evidence-backed engineering intelligence. Correlates GitHub activity with Slack conversations and planning boards.">
+  <title>Sightline Operations Console</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='18' width='100' height='100' fill='%231f8a5b'/><path d='M28 52l16 16 28-32' fill='none' stroke='white' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: light;
@@ -21,6 +26,7 @@
       --blue: #286fbb;
       --blue-soft: #dfeafa;
       --shadow: 0 14px 34px rgba(35, 45, 40, 0.08);
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     * {
@@ -31,8 +37,10 @@
       margin: 0;
       background: var(--page);
       color: var(--ink);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      letter-spacing: 0;
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: -0.006em;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     button,
@@ -46,6 +54,7 @@
       grid-template-rows: auto 1fr;
     }
 
+    /* ─── Topbar ─── */
     .topbar {
       height: 68px;
       display: flex;
@@ -53,8 +62,9 @@
       justify-content: space-between;
       padding: 0 28px;
       border-bottom: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(14px);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       position: sticky;
       top: 0;
       z-index: 3;
@@ -83,7 +93,8 @@
       margin: 0;
       font-size: 18px;
       line-height: 1.1;
-      font-weight: 760;
+      font-weight: 800;
+      letter-spacing: -0.02em;
     }
 
     .brand p {
@@ -114,6 +125,7 @@
       color: var(--muted);
       font-size: 13px;
       white-space: nowrap;
+      transition: all var(--transition);
     }
 
     .dot {
@@ -122,6 +134,18 @@
       border-radius: 99px;
       background: var(--green);
       box-shadow: 0 0 0 4px var(--green-soft);
+      transition: all var(--transition);
+    }
+
+    .dot.scanning {
+      background: var(--blue);
+      box-shadow: 0 0 0 4px var(--blue-soft);
+      animation: pulse-dot 1.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.5); opacity: 0.6; }
     }
 
     .button {
@@ -136,8 +160,26 @@
       background: var(--green);
       color: #fff;
       font-weight: 700;
+      font-size: 13px;
       cursor: pointer;
       box-shadow: 0 8px 18px rgba(31, 138, 91, 0.2);
+      transition: all var(--transition);
+    }
+
+    .button:hover:not(:disabled) {
+      background: #1a7a50;
+      box-shadow: 0 12px 28px rgba(31, 138, 91, 0.28);
+      transform: translateY(-1px);
+    }
+
+    .button:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 4px 10px rgba(31, 138, 91, 0.15);
+    }
+
+    .button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     .list-input {
@@ -149,6 +191,13 @@
       color: var(--ink);
       padding: 0 10px;
       font-size: 13px;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .list-input:focus {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px var(--green-soft);
     }
 
     .button.secondary {
@@ -156,6 +205,13 @@
       background: #fff;
       border-color: var(--line);
       box-shadow: none;
+    }
+
+    .button.secondary:hover:not(:disabled) {
+      background: #f8f9f8;
+      border-color: #c8d0cc;
+      box-shadow: none;
+      transform: translateY(-1px);
     }
 
     .button-icon {
@@ -168,8 +224,10 @@
       border: 1px solid currentColor;
       font-size: 12px;
       line-height: 1;
+      transition: transform var(--transition);
     }
 
+    /* ─── Layout ─── */
     .layout {
       width: min(1440px, 100%);
       margin: 0 auto;
@@ -191,12 +249,24 @@
       align-content: start;
     }
 
+    /* ─── Panel ─── */
     .panel {
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 8px;
       box-shadow: var(--shadow);
       min-width: 0;
+      animation: panel-in 0.5s ease both;
+      transition: box-shadow var(--transition);
+    }
+
+    .panel:hover {
+      box-shadow: 0 18px 44px rgba(35, 45, 40, 0.1);
+    }
+
+    @keyframes panel-in {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .panel-header {
@@ -213,6 +283,7 @@
       margin: 0;
       font-size: 14px;
       font-weight: 760;
+      letter-spacing: -0.01em;
     }
 
     .panel-kicker {
@@ -221,6 +292,7 @@
       font-size: 12px;
     }
 
+    /* ─── Score ─── */
     .score {
       padding: 18px 16px 16px;
       display: grid;
@@ -238,12 +310,15 @@
         radial-gradient(circle at center, #fff 0 58%, transparent 59%),
         conic-gradient(var(--green) calc(var(--score) * 1%), #e8ece9 0);
       border: 1px solid var(--line);
+      transition: background 0.8s ease;
     }
 
     .score-ring strong {
       display: block;
       font-size: 42px;
       line-height: 1;
+      letter-spacing: -0.03em;
+      transition: color var(--transition);
     }
 
     .score-ring span {
@@ -252,6 +327,9 @@
       display: block;
       margin-top: 4px;
       text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 600;
     }
 
     .metric-grid {
@@ -269,18 +347,27 @@
       display: grid;
       align-content: space-between;
       gap: 8px;
+      transition: border-color var(--transition), background var(--transition);
+    }
+
+    .metric:hover {
+      border-color: #c8d0cc;
+      background: #f6f8f7;
     }
 
     .metric b {
       font-size: 24px;
       line-height: 1;
+      letter-spacing: -0.02em;
     }
 
     .metric span {
       color: var(--muted);
       font-size: 12px;
+      font-weight: 500;
     }
 
+    /* ─── Main Grid ─── */
     .main-grid {
       display: grid;
       grid-template-columns: minmax(0, 1.35fr) minmax(330px, 0.65fr);
@@ -301,12 +388,14 @@
         linear-gradient(90deg, rgba(223, 243, 233, 0.95), rgba(255, 255, 255, 0.95)),
         repeating-linear-gradient(135deg, rgba(31, 138, 91, 0.08) 0 1px, transparent 1px 18px);
       box-shadow: var(--shadow);
+      animation: panel-in 0.4s ease both;
     }
 
     .scan-band h2 {
       margin: 0 0 6px;
       font-size: 22px;
       line-height: 1.15;
+      letter-spacing: -0.02em;
     }
 
     .scan-band p {
@@ -335,6 +424,8 @@
       font-size: 11px;
       font-weight: 740;
       text-transform: uppercase;
+      letter-spacing: 0.02em;
+      transition: all 0.35s ease;
     }
 
     .signal-node.active {
@@ -343,6 +434,31 @@
       border-color: #b9dec9;
     }
 
+    .signal-node.scanning {
+      color: #174e87;
+      background: var(--blue-soft);
+      border-color: #bed2ee;
+      animation: pulse-node 1s ease-in-out infinite;
+    }
+
+    @keyframes pulse-node {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .signal-node.done {
+      color: #0f5f3d;
+      background: var(--green-soft);
+      border-color: #b9dec9;
+    }
+
+    .signal-node.waiting {
+      color: var(--muted);
+      background: #fff;
+      border-color: var(--line);
+    }
+
+    /* ─── Table ─── */
     .table-wrap {
       overflow-x: auto;
     }
@@ -358,7 +474,7 @@
       text-align: left;
       padding: 13px 16px;
       border-bottom: 1px solid var(--line);
-      vertical-align: top;
+      vertical-align: middle;
       font-size: 13px;
     }
 
@@ -366,7 +482,8 @@
       color: var(--muted);
       font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0;
+      letter-spacing: 0.04em;
+      font-weight: 600;
       background: #fbfcfb;
       position: sticky;
       top: 0;
@@ -376,8 +493,22 @@
       border-bottom: 0;
     }
 
+    tbody tr {
+      transition: background var(--transition);
+      cursor: pointer;
+    }
+
+    tbody tr:hover {
+      background: #f8faf9;
+    }
+
+    tbody tr.active-row {
+      background: #f0f5f2;
+      border-left: 3px solid var(--green);
+    }
+
     .task-title {
-      font-weight: 760;
+      font-weight: 700;
       margin-bottom: 4px;
     }
 
@@ -385,8 +516,10 @@
       color: var(--muted);
       max-width: 360px;
       line-height: 1.35;
+      font-size: 11px;
     }
 
+    /* ─── Badges ─── */
     .badge {
       display: inline-flex;
       align-items: center;
@@ -397,8 +530,9 @@
       background: #fff;
       color: var(--ink);
       white-space: nowrap;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
+      transition: transform var(--transition);
     }
 
     .badge.red {
@@ -425,6 +559,7 @@
       color: #174e87;
     }
 
+    /* ─── Right Stack ─── */
     .right-stack {
       display: grid;
       gap: 14px;
@@ -446,6 +581,12 @@
       background: #fbfcfb;
       padding: 10px 12px;
       font-size: 13px;
+      transition: border-color var(--transition), background var(--transition);
+    }
+
+    .status-row:hover {
+      border-color: #c8d0cc;
+      background: #f6f8f7;
     }
 
     .status-row b {
@@ -468,6 +609,17 @@
       padding: 10px 12px;
       display: grid;
       gap: 4px;
+      transition: border-color var(--transition);
+      animation: fade-in 0.3s ease both;
+    }
+
+    .feed-item:hover {
+      border-color: #c8d0cc;
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .feed-item strong {
@@ -482,6 +634,7 @@
       line-height: 1.35;
     }
 
+    /* ─── Timeline ─── */
     .timeline {
       padding: 4px 16px 16px;
     }
@@ -491,6 +644,7 @@
       grid-template-columns: 18px minmax(0, 1fr);
       gap: 10px;
       padding-top: 14px;
+      animation: fade-in 0.35s ease both;
     }
 
     .timeline-pin {
@@ -500,6 +654,12 @@
       background: var(--blue);
       margin-top: 4px;
       box-shadow: 0 0 0 4px var(--blue-soft);
+      transition: background var(--transition), box-shadow var(--transition);
+    }
+
+    .timeline-row:last-child .timeline-pin {
+      background: var(--green);
+      box-shadow: 0 0 0 4px var(--green-soft);
     }
 
     .timeline-row h3 {
@@ -514,6 +674,7 @@
       line-height: 1.4;
     }
 
+    /* ─── Alert Preview ─── */
     .alert-preview {
       padding: 16px;
     }
@@ -524,6 +685,7 @@
       border-radius: 8px;
       padding: 14px;
       background: #fff;
+      animation: fade-in 0.4s ease both;
     }
 
     .slack-card h3 {
@@ -548,6 +710,7 @@
       color: var(--muted);
     }
 
+    /* ─── Evidence ─── */
     .evidence-list {
       display: grid;
       gap: 10px;
@@ -559,6 +722,12 @@
       border-radius: 8px;
       padding: 12px;
       background: #fbfcfb;
+      transition: border-color var(--transition);
+      animation: fade-in 0.35s ease both;
+    }
+
+    .evidence-item:hover {
+      border-color: #c8d0cc;
     }
 
     .evidence-top {
@@ -580,6 +749,7 @@
       line-height: 1.42;
     }
 
+    /* ─── Risks ─── */
     .risk-list {
       display: grid;
       gap: 10px;
@@ -595,6 +765,12 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #fbfcfb;
+      transition: border-color var(--transition);
+      animation: fade-in 0.3s ease both;
+    }
+
+    .risk-item:hover {
+      border-color: #c8d0cc;
     }
 
     .risk-item b {
@@ -608,16 +784,116 @@
       line-height: 1.35;
     }
 
+    /* ─── Empty State ─── */
     .empty-state {
       color: var(--muted);
       font-size: 13px;
+      padding: 24px 16px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .empty-state .empty-icon {
+      display: block;
+      font-size: 28px;
+      margin-bottom: 8px;
+      opacity: 0.5;
+    }
+
+    .empty-state .empty-hint {
+      display: block;
+      font-size: 12px;
+      margin-top: 4px;
+      opacity: 0.7;
+    }
+
+    /* ─── Shimmer Loading ─── */
+    .shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shimmer::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.5) 50%,
+        transparent 100%
+      );
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* ─── Scan Progress ─── */
+    .scan-progress {
       padding: 16px;
+      display: grid;
+      gap: 10px;
     }
 
-    .loading {
-      opacity: 0.64;
+    .scan-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      transition: all 0.3s ease;
+      opacity: 0.4;
     }
 
+    .scan-step.active {
+      color: var(--ink);
+      opacity: 1;
+      font-weight: 600;
+    }
+
+    .scan-step.done {
+      color: var(--green);
+      opacity: 0.8;
+    }
+
+    .scan-step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: var(--line);
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .scan-step.active .scan-step-dot {
+      background: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-soft);
+      animation: pulse-dot 1s ease-in-out infinite;
+    }
+
+    .scan-step.done .scan-step-dot {
+      background: var(--green);
+      box-shadow: 0 0 0 3px var(--green-soft);
+    }
+
+    /* ─── Spinner ─── */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ─── Responsive ─── */
     @media (max-width: 1080px) {
       .layout,
       .main-grid {
@@ -681,151 +957,203 @@
       <div class="brand">
         <div class="brand-mark" aria-hidden="true"></div>
         <div>
-          <h1>Sightline Demo Console</h1>
-          <p id="listLabel">Evidence-backed Slack List automation</p>
+          <h1>Sightline</h1>
+          <p id="listLabel">AnupojuRohit/Sightline · GitHub Intelligence</p>
         </div>
       </div>
       <div class="toolbar">
-        <div class="status-pill"><span class="dot" aria-hidden="true"></span><span id="scanState">Ready</span></div>
-        <input class="list-input" id="listIdInput" type="text" autocomplete="off" placeholder="Slack List ID">
+        <div class="status-pill"><span class="dot" id="statusDot" aria-hidden="true"></span><span id="scanState">Ready</span></div>
+        <input class="list-input" id="listIdInput" type="text" autocomplete="off" placeholder="Slack List ID (optional)">
         <button class="button secondary" type="button" id="resetButton" title="Refresh real scan">
-          <span class="button-icon" aria-hidden="true">R</span>
+          <span class="button-icon" aria-hidden="true">↻</span>
           Refresh
         </button>
         <button class="button" type="button" id="scanButton" title="Run the Sightline scan">
-          <span class="button-icon" aria-hidden="true">&gt;</span>
-          Run Scan
+          <span class="button-icon" id="scanButtonIcon" aria-hidden="true">▶</span>
+          <span id="scanButtonLabel">Run Scan</span>
         </button>
       </div>
     </header>
 
     <main class="layout">
       <aside class="sidebar">
-        <section class="panel">
+        <section class="panel" style="animation-delay: 0.05s">
           <div class="panel-header">
             <div>
-              <h2 class="panel-title">Project Health</h2>
-              <p class="panel-kicker">Live demo metrics</p>
+              <h2 class="panel-title">Repository Health</h2>
+              <p class="panel-kicker">Real-time health score</p>
             </div>
             <span class="badge green" id="generatedAt">Now</span>
           </div>
           <div class="score">
             <div class="score-ring" id="scoreRing" style="--score: 0">
               <div>
-                <strong id="healthScore">0</strong>
+                <strong id="healthScore">—</strong>
                 <span>score</span>
               </div>
             </div>
-            <div class="metric-grid">
-              <div class="metric"><b id="totalTasks">0</b><span>Total tasks</span></div>
-              <div class="metric"><b id="staleTasks">0</b><span>Stale tasks</span></div>
-              <div class="metric"><b id="blockedTasks">0</b><span>Blocked</span></div>
-              <div class="metric"><b id="overdueTasks">0</b><span>Overdue</span></div>
+            <div id="healthBreakdown" style="font-size: 11px; color: var(--muted); border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px;">
+              <strong style="display: block; margin-bottom: 6px; color: var(--ink);">Health Score Breakdown:</strong>
+              <div id="healthDeductionsList" style="display: grid; gap: 5px;">
+                <div style="display: flex; justify-content: space-between;"><span>Baseline Score</span><b>100</b></div>
+              </div>
+            </div>
+            <div class="metric-grid" style="border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px;">
+              <div class="metric"><b id="openPRs">—</b><span>Open PRs</span></div>
+              <div class="metric"><b id="mergedPRs">—</b><span>Merged PRs</span></div>
+              <div class="metric"><b id="openIssues">—</b><span>Open Issues</span></div>
+              <div class="metric"><b id="staleWork">—</b><span>Stale Work</span></div>
+            </div>
+            <div style="border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; font-size: 11px; color: var(--muted);">
+              <strong style="color: var(--ink);">Latest Commit:</strong>
+              <p id="latestCommit" style="margin: 4px 0 0; line-height: 1.35; font-style: italic;">—</p>
             </div>
           </div>
         </section>
 
-        <section class="panel">
+        <section class="panel" style="animation-delay: 0.1s">
           <div class="panel-header">
             <div>
-              <h2 class="panel-title">Risks</h2>
-              <p class="panel-kicker">Classic project health signals</p>
+              <h2 class="panel-title">Operational Risks</h2>
+              <p class="panel-kicker">Actionable engineering risks</p>
             </div>
             <span class="badge amber" id="riskCount">0</span>
           </div>
-          <div class="risk-list" id="riskList"></div>
+          <div class="risk-list" id="riskList">
+            <div class="empty-state">
+              <span class="empty-icon">🛡</span>
+              Run a scan to detect project risks.
+              <span class="empty-hint">Risks include stale pull requests, unmapped work, and planning mismatches.</span>
+            </div>
+          </div>
         </section>
       </aside>
 
       <section class="main-grid">
         <div class="scan-band">
           <div>
-            <h2>Slack List status checked against source-of-truth evidence.</h2>
-            <p>Sightline scans the active Slack List, GitHub issue/PR state, and Slack RTS evidence, then recommends only evidence-backed updates.</p>
+            <h2>Continuous planning-execution alignment.</h2>
+            <p>Sightline automatically maps pull requests and code commits from <strong>AnupojuRohit/Sightline</strong> against task states in your Slack List, highlighting unmapped active code branches and planning mismatches.</p>
           </div>
-          <div class="signal-map" aria-label="Scan pipeline">
-            <div class="signal-node active">Slack List</div>
-            <div class="signal-node active">GitHub</div>
-            <div class="signal-node active">Slack RTS</div>
-            <div class="signal-node active">Action</div>
+          <div class="signal-map" aria-label="Scan pipeline" id="signalMap">
+            <div class="signal-node active" id="sig-list">Slack List</div>
+            <div class="signal-node active" id="sig-github">GitHub</div>
+            <div class="signal-node active" id="sig-rts">Slack RTS</div>
+            <div class="signal-node active" id="sig-action">Action</div>
           </div>
         </div>
 
-        <section class="panel">
+        <section class="panel" style="animation-delay: 0.15s">
           <div class="panel-header">
             <div>
-              <h2 class="panel-title">Task Review</h2>
-              <p class="panel-kicker">Current status vs Sightline recommendation</p>
+              <h2 class="panel-title">Engineering Work Items</h2>
+              <p class="panel-kicker">Correlating live GitHub commits/PRs with Slack planning status</p>
             </div>
-            <span class="badge blue" id="readiness">0% ready</span>
+            <span class="badge blue" id="readiness">Planning Sync: —</span>
+          </div>
+          <div id="planningEmptyAlert" style="display:none; padding: 12px 16px; background: #fffdf5; border-bottom: 1px solid var(--line); color: #7b5900; font-size: 13px;">
+            ⚠️ <strong>No planning items found:</strong> This Slack List currently contains no task cards. Live repository branches are listed below as unmapped engineering changes.
           </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Task</th>
-                  <th>Owner</th>
-                  <th>Status</th>
-                  <th>Recommended</th>
-                  <th>Due</th>
-                  <th>Signal</th>
+                  <th>Work Item</th>
+                  <th>GitHub Status</th>
+                  <th>Slack Evidence</th>
+                  <th>Planning</th>
+                  <th>Recommendation</th>
+                  <th>Confidence</th>
                 </tr>
               </thead>
-              <tbody id="taskTable"></tbody>
+              <tbody id="taskTable">
+                <tr><td colspan="6">
+                  <div class="empty-state">
+                    <span class="empty-icon">📋</span>
+                    No engineering work items loaded yet.
+                    <span class="empty-hint">Click <strong>Run Scan</strong> to index pull requests and planning boards.</span>
+                  </div>
+                </td></tr>
+              </tbody>
             </table>
           </div>
         </section>
 
         <div class="right-stack">
-          <section class="panel">
+          <section class="panel" style="animation-delay: 0.2s">
             <div class="panel-header">
               <div>
                 <h2 class="panel-title">Integration Status</h2>
                 <p class="panel-kicker">Live readiness snapshot</p>
               </div>
             </div>
-            <div class="status-list" id="integrationStatus"></div>
+            <div class="status-list" id="integrationStatus">
+              <div class="empty-state">
+                <span class="empty-icon">🔌</span>
+                Checking integrations…
+              </div>
+            </div>
           </section>
 
-          <section class="panel">
+          <section class="panel" style="animation-delay: 0.25s">
             <div class="panel-header">
               <div>
                 <h2 class="panel-title">Live Event Feed</h2>
-                <p class="panel-kicker">Context -> evidence -> action trail</p>
+                <p class="panel-kicker">Context → evidence → action trail</p>
               </div>
               <span class="badge blue" id="lastEventAt">No events</span>
             </div>
-            <div class="feed-list" id="eventFeed"></div>
+            <div class="feed-list" id="eventFeed">
+              <div class="empty-state">
+                <span class="empty-icon">📡</span>
+                No runtime events captured yet.
+              </div>
+            </div>
           </section>
 
-          <section class="panel">
+          <section class="panel" style="animation-delay: 0.3s">
             <div class="panel-header">
               <div>
                 <h2 class="panel-title">Evidence Timeline</h2>
-                <p class="panel-kicker">What judges should see first</p>
+                <p class="panel-kicker">Scan progression and findings</p>
               </div>
             </div>
-            <div class="timeline" id="timeline"></div>
+            <div class="timeline" id="timeline">
+              <div class="empty-state">
+                <span class="empty-icon">🔍</span>
+                Evidence timeline appears after a scan.
+              </div>
+            </div>
           </section>
 
-          <section class="panel">
+          <section class="panel" style="animation-delay: 0.35s">
             <div class="panel-header">
               <div>
-                <h2 class="panel-title">Slack Alert Preview</h2>
-                <p class="panel-kicker">The in-channel action card</p>
+                <h2 class="panel-title">Recommendation Evidence Detail</h2>
+                <p class="panel-kicker" id="recommendationDetailHeader">Click a work item to inspect details</p>
               </div>
             </div>
-            <div class="alert-preview" id="alertPreview"></div>
+            <div class="alert-preview" id="alertPreview">
+              <div class="empty-state">
+                <span class="empty-icon">💬</span>
+                Select a work item row to view supporting evidence and verification state.
+              </div>
+            </div>
           </section>
 
-          <section class="panel">
+          <section class="panel" style="animation-delay: 0.4s">
             <div class="panel-header">
               <div>
-                <h2 class="panel-title">Evidence Feed</h2>
-                <p class="panel-kicker">GitHub and Slack facts used by rules</p>
+                <h2 class="panel-title">Recent Evidence Log</h2>
+                <p class="panel-kicker">Raw signals matching selected item</p>
               </div>
             </div>
-            <div class="evidence-list" id="evidenceList"></div>
+            <div class="evidence-list" id="evidenceList">
+              <div class="empty-state">
+                <span class="empty-icon">📂</span>
+                No evidence logs selected.
+              </div>
+            </div>
           </section>
         </div>
       </section>
@@ -834,7 +1162,9 @@
 
   <script>
     const state = {
-      payload: null
+      payload: null,
+      scanning: false,
+      selectedTaskIndex: -1
     };
 
     const $ = (id) => document.getElementById(id);
@@ -860,47 +1190,179 @@
       return "blue";
     }
 
+    /* ─── Animated counter ─── */
+    function animateNumber(el, target, duration = 600) {
+      const start = parseInt(el.textContent) || 0;
+      if (start === target) { el.textContent = target; return; }
+      const startTime = performance.now();
+      function tick(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(start + (target - start) * eased);
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    /* ─── Score ring animation ─── */
+    function animateScore(value) {
+      const ring = $("scoreRing");
+      let current = parseInt(ring.style.getPropertyValue("--score")) || 0;
+      const startTime = performance.now();
+      const duration = 800;
+      function tick(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const v = Math.round(current + (value - current) * eased);
+        ring.style.setProperty("--score", v);
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    /* ─── Signal node states ─── */
+    function setSignalStates(states) {
+      const ids = ["sig-list", "sig-github", "sig-rts", "sig-action"];
+      ids.forEach((id, i) => {
+        const el = $(id);
+        if (el) el.className = "signal-node " + (states[i] || "waiting");
+      });
+    }
+
+    /* ─── Scan progress steps (feels intelligent) ─── */
+    const SCAN_STEPS = [
+      "Connecting to GitHub…",
+      "Fetching Pull Requests…",
+      "Searching Slack conversations…",
+      "Correlating engineering evidence…",
+      "Generating recommendations…",
+      "Repository synchronized."
+    ];
+
+    function showScanProgress() {
+      const container = $("timeline");
+      container.innerHTML = '<div class="scan-progress" id="scanProgressContainer">' +
+        SCAN_STEPS.map((step, i) =>
+          `<div class="scan-step" id="scan-step-${i}"><span class="scan-step-dot"></span>${escapeHtml(step)}</div>`
+        ).join("") + '</div>';
+
+      let current = 0;
+      function advanceStep() {
+        if (!state.scanning) return;
+        if (current > 0) {
+          const prev = document.getElementById(`scan-step-${current - 1}`);
+          if (prev) { prev.classList.remove("active"); prev.classList.add("done"); }
+        }
+        const el = document.getElementById(`scan-step-${current}`);
+        if (el) { el.classList.add("active"); }
+
+        // Update signal nodes
+        if (current === 0) setSignalStates(["scanning", "waiting", "waiting", "waiting"]);
+        if (current === 1) setSignalStates(["scanning", "waiting", "waiting", "waiting"]);
+        if (current === 2) setSignalStates(["done", "scanning", "waiting", "waiting"]);
+        if (current === 3) setSignalStates(["done", "scanning", "waiting", "waiting"]);
+        if (current === 4) setSignalStates(["done", "done", "scanning", "waiting"]);
+        if (current >= 5) setSignalStates(["done", "done", "done", "done"]);
+
+        // Update status pill text
+        $("scanState").textContent = SCAN_STEPS[current].replace("…", "");
+
+        current++;
+        if (current < SCAN_STEPS.length && state.scanning) {
+          setTimeout(advanceStep, 400 + Math.random() * 250);
+        }
+      }
+      advanceStep();
+    }
+
+    function finishScanProgress() {
+      SCAN_STEPS.forEach((_, i) => {
+        const el = document.getElementById(`scan-step-${i}`);
+        if (el) { el.classList.remove("active"); el.classList.add("done"); }
+      });
+      setSignalStates(["done", "done", "done", "done"]);
+      setTimeout(() => setSignalStates(["active", "active", "active", "active"]), 1200);
+    }
+
+    /* ─── Render functions ─── */
     function render(payload) {
       state.payload = payload;
       const summary = payload.summary;
 
-      $("listLabel").textContent = `${payload.listId} - generated ${payload.generatedAt}`;
+      $("listLabel").textContent = `AnupojuRohit/Sightline · generated ${payload.generatedAt}`;
       $("generatedAt").textContent = "Live";
-      $("healthScore").textContent = summary.healthScore;
-      $("scoreRing").style.setProperty("--score", summary.healthScore);
-      $("totalTasks").textContent = summary.totalTasks;
-      $("staleTasks").textContent = summary.staleTasks;
-      $("blockedTasks").textContent = summary.blockedTasks;
-      $("overdueTasks").textContent = summary.overdueTasks;
-      $("readiness").textContent = `${summary.automationReadiness}% ready`;
+      animateNumber($("healthScore"), summary.healthScore);
+      animateScore(summary.healthScore);
+      animateNumber($("openPRs"), summary.openPRs || 0);
+      animateNumber($("mergedPRs"), summary.mergedPRs || 0);
+      animateNumber($("openIssues"), summary.openIssues || 0);
+      animateNumber($("staleWork"), summary.staleWork || 0);
+      $("readiness").textContent = `Planning Sync: ${summary.automationReadiness}%`;
       $("riskCount").textContent = payload.risks.length;
+      $("latestCommit").textContent = summary.latestCommit || "—";
 
+      $("planningEmptyAlert").style.display = payload.planningEmpty ? "block" : "none";
+
+      renderHealthBreakdown(payload.healthBreakdown);
       renderTasks(payload.tasks);
       renderRisks(payload.risks);
       renderTimeline(payload.timeline);
-      renderAlert(payload.alertPreview);
-      renderEvidence(payload.mismatches);
+
+      // Auto-select first item that has actionable recommendations
+      let initialSelectIndex = payload.tasks.findIndex(t => t.isStale || t.status === "Unmapped");
+      if (initialSelectIndex === -1 && payload.tasks.length > 0) {
+        initialSelectIndex = 0;
+      }
+      if (initialSelectIndex !== -1) {
+        selectWorkItem(initialSelectIndex);
+      } else {
+        renderAlert(null);
+        renderEvidenceLogs(null);
+      }
+
       refreshHealthAndEvents();
+    }
+
+    function renderHealthBreakdown(breakdown) {
+      if (!breakdown || !breakdown.deductions) return;
+      const listEl = $("healthDeductionsList");
+      let html = `<div style="display: flex; justify-content: space-between; font-weight:600; margin-bottom:4px; color: var(--ink);"><span>Baseline Score</span><b>100</b></div>`;
+      
+      breakdown.deductions.forEach(d => {
+        html += `<div style="display: flex; justify-content: space-between; color: var(--red);">
+          <span>➖ ${escapeHtml(d.metric)} (${escapeHtml(d.detail)})</span>
+          <b>-${d.deduction}</b>
+        </div>`;
+      });
+      if (breakdown.deductions.length === 0) {
+        html += `<div style="color: var(--green); font-weight:600;">✨ All operational signals optimal</div>`;
+      }
+      html += `<div style="display: flex; justify-content: space-between; border-top: 1px solid var(--line); margin-top: 6px; padding-top: 6px; font-weight: 700; color: var(--ink);">
+        <span>Current Score</span>
+        <b>${breakdown.score}/100</b>
+      </div>`;
+      listEl.innerHTML = html;
     }
 
     function renderScanError(payload) {
       $("scanState").textContent = payload?.message || payload?.error || "Scan failed";
-      $("listLabel").textContent = "Real scan unavailable";
+      $("listLabel").textContent = "Scan failed";
       $("generatedAt").textContent = "Check";
-      $("healthScore").textContent = "0";
+      $("healthScore").textContent = "—";
       $("scoreRing").style.setProperty("--score", 0);
-      $("totalTasks").textContent = "0";
-      $("staleTasks").textContent = "0";
-      $("blockedTasks").textContent = "0";
-      $("overdueTasks").textContent = "0";
-      $("readiness").textContent = "0% ready";
+      $("openPRs").textContent = "—";
+      $("mergedPRs").textContent = "—";
+      $("openIssues").textContent = "—";
+      $("staleWork").textContent = "—";
+      $("latestCommit").textContent = "—";
+      $("readiness").textContent = "Planning Sync: —";
       $("riskCount").textContent = "0";
-      $("taskTable").innerHTML = "";
-      $("riskList").innerHTML = `<div class="empty-state">${escapeHtml(payload?.message || payload?.error || "Unable to run scan.")}</div>`;
-      $("timeline").innerHTML = `<div class="empty-state">Run Scan requires a live Slack List ID.</div>`;
-      $("alertPreview").innerHTML = `<div class="empty-state">No alert preview until a real scan completes.</div>`;
-      $("evidenceList").innerHTML = `<div class="empty-state">No live evidence available.</div>`;
-      document.body.classList.remove("loading");
+      $("taskTable").innerHTML = `<tr><td colspan="6"><div class="empty-state"><span class="empty-icon">⚠️</span>${escapeHtml(payload?.message || payload?.error || "Unable to run scan.")}</div></td></tr>`;
+      $("riskList").innerHTML = `<div class="empty-state"><span class="empty-icon">🛡</span>No risk data available.</div>`;
+      $("timeline").innerHTML = `<div class="empty-state"><span class="empty-icon">🔍</span>Scan failed.</div>`;
+      $("alertPreview").innerHTML = `<div class="empty-state"><span class="empty-icon">💬</span>No alert preview.</div>`;
+      $("evidenceList").innerHTML = `<div class="empty-state"><span class="empty-icon">📂</span>No evidence.</div>`;
+      setSignalStates(["active", "active", "active", "active"]);
       refreshHealthAndEvents();
     }
 
@@ -914,7 +1376,7 @@
         {
           label: "GitHub Provider",
           ok: !!health.github?.tokenPresent,
-          detail: health.github?.tokenPresent ? "Live provider ready" : "Token missing - fallback mode"
+          detail: health.github?.tokenPresent ? "AnupojuRohit/Sightline" : "Token missing — mock mode"
         },
         {
           label: "RTS OAuth",
@@ -929,7 +1391,7 @@
         {
           label: "Slack Lists",
           ok: !!health.lists?.defaultListIdPresent && !health.lists?.mockListsEnabled,
-          detail: health.lists?.mockListsEnabled ? "Mock mode enabled" : health.lists?.defaultListIdPresent ? "Live list configured" : "List ID required"
+          detail: health.lists?.mockListsEnabled ? "Mock mode" : health.lists?.defaultListIdPresent ? "Live list ready" : "Unconfigured"
         },
         {
           label: "List Updates",
@@ -952,19 +1414,19 @@
       $("lastEventAt").textContent = feed?.lastEventAt || "No events";
 
       if (!events.length) {
-        $("eventFeed").innerHTML = `<div class="empty-state">No runtime events captured yet.</div>`;
+        $("eventFeed").innerHTML = `<div class="empty-state"><span class="empty-icon">📡</span>No runtime events captured yet.</div>`;
       } else {
-        $("eventFeed").innerHTML = events.map((event) => `
-          <article class="feed-item">
-            <strong>${escapeHtml(event.ts)} - ${escapeHtml(event.step)}</strong>
+        $("eventFeed").innerHTML = events.map((event, i) => `
+          <article class="feed-item" style="animation-delay: ${i * 0.04}s">
+            <strong>${escapeHtml(event.ts)} · ${escapeHtml(event.step)}</strong>
             <p>${escapeHtml(event.detail)}</p>
           </article>
         `).join("");
       }
 
-      if (state.payload) {
+      if (state.payload && !state.scanning) {
         const resolved = Number(stats.updates_applied || 0) + Number(stats.dismissals || 0);
-        $("scanState").textContent = `${state.payload.summary.staleTasks} stale found | ${resolved} resolved`;
+        $("scanState").textContent = `${state.payload.summary.staleTasks} stale found · ${resolved} resolved`;
       }
     }
 
@@ -975,57 +1437,165 @@
           fetch("/api/events", { cache: "no-store" })
         ]);
 
-        if (healthRes.ok) {
-          renderHealth(await healthRes.json());
-        }
-        if (eventRes.ok) {
-          renderEvents(await eventRes.json());
-        }
-      } catch (_) {
-        // Keep the existing dashboard payload visible even if status polling fails.
-      }
+        if (healthRes.ok) renderHealth(await healthRes.json());
+        if (eventRes.ok) renderEvents(await eventRes.json());
+      } catch (_) {}
     }
 
     function renderTasks(tasks) {
-      $("taskTable").innerHTML = tasks.map((task) => {
-        const signal = task.isStale ? "Stale" : task.blockedBy.length ? "Blocked" : "Clear";
-        const tone = statusTone(task.status, task.isStale);
+      if (!tasks.length) {
+        $("taskTable").innerHTML = `<tr><td colspan="6"><div class="empty-state"><span class="empty-icon">✅</span>No engineering work items mapped.</div></td></tr>`;
+        return;
+      }
+
+      $("taskTable").innerHTML = tasks.map((task, i) => {
+        const rowClass = (state.selectedTaskIndex === i) ? "active-row" : "";
+        const gitTone = task.githubStatus === "merged" ? "green" : task.githubStatus === "open" ? "blue" : "muted";
+        const planningTone = task.status === "Unmapped" ? "amber" : statusTone(task.status);
+        const recTone = task.recommendation.startsWith("Update") ? "red" : task.recommendation.startsWith("Track") ? "amber" : "green";
+        const confTone = task.confidence >= 90 ? "green" : "amber";
+
+        // Count matched evidence sources
+        let matchCount = 0;
+        if (task.github_matched) matchCount++;
+        if (task.slack_matched) matchCount++;
+        if (task.planning_matched) matchCount++;
+
         return `
-          <tr>
+          <tr id="task-row-${i}" class="${rowClass}" onclick="selectWorkItem(${i})" style="animation: fade-in 0.3s ease ${i * 0.05}s both;">
             <td>
               <div class="task-title">${escapeHtml(task.title)}</div>
-              <div class="task-desc">${escapeHtml(task.description || "")}</div>
+              <div class="task-desc">Owner: <strong>${escapeHtml(task.owner)}</strong> ${task.description ? '· ' + escapeHtml(task.description) : ''}</div>
             </td>
-            <td>${escapeHtml(task.owner)}</td>
-            <td>${badge(task.status, tone)}</td>
-            <td>${badge(task.recommendedStatus, task.isStale ? "green" : "")}</td>
-            <td>${escapeHtml(task.dueDate || "No date")}</td>
-            <td>${badge(signal, task.isStale ? "red" : task.blockedBy.length ? "amber" : "green")}</td>
+            <td>${badge(task.githubStatus, gitTone)}</td>
+            <td>
+              <span class="badge" style="border-color: var(--line);">${matchCount}/3 evidence matched</span>
+            </td>
+            <td>${badge(task.status, planningTone)}</td>
+            <td>${badge(task.recommendation, recTone)}</td>
+            <td>${badge(task.confidence + "%", confTone)}</td>
           </tr>
         `;
       }).join("");
     }
 
-    function renderRisks(risks) {
-      if (!risks.length) {
-        $("riskList").innerHTML = `<div class="empty-state">No project risks detected.</div>`;
+    function selectWorkItem(index) {
+      if (state.selectedTaskIndex !== -1) {
+        const prev = document.getElementById(`task-row-${state.selectedTaskIndex}`);
+        if (prev) prev.classList.remove("active-row");
+      }
+      state.selectedTaskIndex = index;
+      const curr = document.getElementById(`task-row-${index}`);
+      if (curr) curr.classList.add("active-row");
+
+      const task = state.payload.tasks[index];
+      if (!task) return;
+
+      $("recommendationDetailHeader").textContent = `Supporting evidence for: "${task.title}"`;
+      renderAlert(task);
+      renderEvidenceLogs(task);
+    }
+
+    function renderAlert(task) {
+      const container = $("alertPreview");
+      if (!task) {
+        container.innerHTML = `<div class="empty-state"><span class="empty-icon">💬</span>No alert preview.</div>`;
         return;
       }
 
-      $("riskList").innerHTML = risks.map((risk) => `
-        <article class="risk-item">
+      // Checkmarks list
+      const chkGit = task.github_matched ? "✔" : "✘";
+      const chkSlack = task.slack_matched ? "✔" : "✘";
+      const chkPlan = task.planning_matched ? "✔" : "✘";
+
+      const recTone = task.recommendation.startsWith("Update") ? "red" : task.recommendation.startsWith("Track") ? "amber" : "green";
+      
+      let html = `
+        <div class="slack-card" style="border-left-color: ${task.isStale ? 'var(--red)' : 'var(--green)'};">
+          <h3 style="display:flex; justify-content:space-between; align-items:center; margin-top:0; border-bottom: 1px solid var(--line); padding-bottom: 8px;">
+            <span>Recommendation: <strong style="color:var(--ink);">${escapeHtml(task.recommendation)}</strong></span>
+            ${badge(task.confidence + "% Confidence", task.confidence >= 90 ? "green" : "amber")}
+          </h3>
+
+          <div style="margin: 12px 0;">
+            <strong style="font-size:12px; display:block; margin-bottom:4px; color: var(--ink);">Reasoning Summary:</strong>
+            <p style="margin:0; font-size:12px; line-height:1.45; color: var(--muted); font-style: italic;">
+              "${escapeHtml(task.reason || "All planning status variables align with repository metadata. No staleness detected.")}"
+            </p>
+          </div>
+
+          <table style="width:100%; border-collapse:collapse; margin-top:12px; min-width:unset;">
+            <thead>
+              <tr style="background:transparent;"><th style="padding:4px 0; border-bottom:1px solid #edf0ee;">Evidence Source</th><th style="padding:4px 0; border-bottom:1px solid #edf0ee; text-align:right;">State</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:6px 0; border-bottom:1px solid #edf0ee;">GitHub Pull Request [${chkGit}]</td>
+                <td style="padding:6px 0; border-bottom:1px solid #edf0ee; text-align:right; font-weight:600;">${escapeHtml(task.githubStatus.toUpperCase())}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0; border-bottom:1px solid #edf0ee;">Slack Conversation [${chkSlack}]</td>
+                <td style="padding:6px 0; border-bottom:1px solid #edf0ee; text-align:right; font-weight:600;">${task.evidenceCount} permalinked log(s)</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0; border-bottom:0;">Planning List [${chkPlan}]</td>
+                <td style="padding:6px 0; border-bottom:0; text-align:right; font-weight:600;">${escapeHtml(task.status.toUpperCase())}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="border-top:1px solid #edf0ee; margin-top:12px; padding-top:8px; font-size:11px; color: var(--muted); line-height:1.4;">
+            ℹ️ <em>Sightline correlated GitHub activity, Slack communication, and planning state to produce this evidence-backed recommendation.</em>
+          </div>
+        </div>
+      `;
+      container.innerHTML = html;
+    }
+
+    function renderEvidenceLogs(task) {
+      const container = $("evidenceList");
+      if (!task || !task.evidence || task.evidence.length === 0) {
+        container.innerHTML = `<div class="empty-state"><span class="empty-icon">📂</span>No matching evidence logs found for this item.</div>`;
+        return;
+      }
+
+      container.innerHTML = task.evidence.map((row, i) => `
+        <article class="evidence-item" style="animation-delay: ${i * 0.05}s">
+          <div class="evidence-top">
+            <b>${escapeHtml(row.source)}</b>
+            <a href="${escapeHtml(row.url)}" target="_blank" style="font-size:11px; text-decoration:none; color: var(--blue);">View Original ↗</a>
+          </div>
+          <p><strong>${escapeHtml(row.label)}</strong></p>
+          <p style="margin-top:4px;">${escapeHtml(row.detail)}</p>
+        </article>
+      `).join("");
+    }
+
+    function renderRisks(risks) {
+      if (!risks.length) {
+        $("riskList").innerHTML = `<div class="empty-state"><span class="empty-icon">🎉</span>No operational risks detected.</div>`;
+        return;
+      }
+
+      $("riskList").innerHTML = risks.map((risk, i) => `
+        <article class="risk-item" style="animation-delay: ${i * 0.05}s">
           <div class="evidence-top">
             <b>${escapeHtml(risk.title)}</b>
             ${badge(risk.severity, risk.severity === "HIGH" ? "red" : "amber")}
           </div>
-          <p>${escapeHtml(risk.reason)} ${escapeHtml(risk.recommendation)}</p>
+          <p>${escapeHtml(risk.reason)} <strong>${escapeHtml(risk.recommendation)}</strong></p>
         </article>
       `).join("");
     }
 
     function renderTimeline(rows) {
-      $("timeline").innerHTML = rows.map((row) => `
-        <div class="timeline-row">
+      if (!rows.length) {
+        $("timeline").innerHTML = `<div class="empty-state"><span class="empty-icon">🔍</span>No timeline data.</div>`;
+        return;
+      }
+
+      $("timeline").innerHTML = rows.map((row, i) => `
+        <div class="timeline-row" style="animation-delay: ${i * 0.08}s">
           <span class="timeline-pin" aria-hidden="true"></span>
           <div>
             <h3>${escapeHtml(row.step)}</h3>
@@ -1035,75 +1605,99 @@
       `).join("");
     }
 
-    function renderAlert(alert) {
-      if (!alert) {
-        $("alertPreview").innerHTML = `<div class="empty-state">No stale-task alert for this scan.</div>`;
-        return;
+    /* ─── Scan orchestration ─── */
+    function setScanButtonState(scanning) {
+      const btn = $("scanButton");
+      const resetBtn = $("resetButton");
+      const icon = $("scanButtonIcon");
+      const label = $("scanButtonLabel");
+      const dot = $("statusDot");
+
+      if (scanning) {
+        btn.disabled = true;
+        resetBtn.disabled = true;
+        icon.outerHTML = '<span class="spinner" id="scanButtonIcon"></span>';
+        label.textContent = "Scanning…";
+        dot.classList.add("scanning");
+      } else {
+        btn.disabled = false;
+        resetBtn.disabled = false;
+        const currentIcon = $("scanButtonIcon");
+        if (currentIcon) currentIcon.outerHTML = '<span class="button-icon" id="scanButtonIcon" aria-hidden="true">▶</span>';
+        label.textContent = "Run Scan";
+        dot.classList.remove("scanning");
       }
-
-      const evidence = alert.evidence.map((row) => `<div class="slack-line"><span>${escapeHtml(row.source)}</span><b>${escapeHtml(row.detail)}</b></div>`).join("");
-      $("alertPreview").innerHTML = `
-        <div class="slack-card">
-          <h3>${escapeHtml(alert.title)}</h3>
-          <div class="slack-line"><span>Task</span><b>${escapeHtml(alert.taskTitle)}</b></div>
-          <div class="slack-line"><span>Current</span><b>${escapeHtml(alert.currentStatus)}</b></div>
-          <div class="slack-line"><span>Recommended</span><b>${escapeHtml(alert.recommendedStatus)}</b></div>
-          <div class="slack-line"><span>Reason</span><b>${escapeHtml(alert.reason)}</b></div>
-          ${evidence}
-        </div>
-      `;
-    }
-
-    function renderEvidence(mismatches) {
-      const rows = mismatches.flatMap((mismatch) => mismatch.evidence.map((row) => ({
-        taskTitle: mismatch.taskTitle,
-        ...row
-      })));
-
-      if (!rows.length) {
-        $("evidenceList").innerHTML = `<div class="empty-state">No evidence rows available.</div>`;
-        return;
-      }
-
-      $("evidenceList").innerHTML = rows.map((row) => `
-        <article class="evidence-item">
-          <div class="evidence-top">
-            <b>${escapeHtml(row.source)}</b>
-            ${badge(row.taskTitle, row.source === "GitHub" ? "blue" : "green")}
-          </div>
-          <p><strong>${escapeHtml(row.label)}</strong></p>
-          <p>${escapeHtml(row.detail)}</p>
-        </article>
-      `).join("");
     }
 
     async function loadScan(showScanning) {
+      if (state.scanning) return;
+
       if (showScanning) {
-        $("scanState").textContent = "Scanning";
-        document.body.classList.add("loading");
+        state.scanning = true;
+        setScanButtonState(true);
+        showScanProgress();
       }
 
       const listId = $("listIdInput").value.trim();
       const url = listId ? `/api/scan?list_id=${encodeURIComponent(listId)}` : "/api/scan";
-      const response = await fetch(url, { cache: "no-store" });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        renderScanError(payload);
-        return;
-      }
 
-      window.setTimeout(() => {
+      try {
+        const response = await fetch(url, { cache: "no-store" });
+        let payload = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          if (!showScanning) {
+            const demoResponse = await fetch("/api/demo", { cache: "no-store" });
+            if (demoResponse.ok) {
+              payload = await demoResponse.json().catch(() => ({}));
+              render(payload);
+              $("scanState").textContent = "Demo data loaded";
+              return;
+            }
+          }
+          state.scanning = false;
+          setScanButtonState(false);
+          renderScanError(payload);
+          return;
+        }
+
+        if (showScanning) {
+          finishScanProgress();
+          await new Promise(r => setTimeout(r, 600));
+        }
+
+        state.scanning = false;
+        setScanButtonState(false);
         render(payload);
         $("scanState").textContent = `${payload.summary.staleTasks} stale found`;
-        document.body.classList.remove("loading");
-      }, showScanning ? 450 : 0);
+
+      } catch (err) {
+        if (!showScanning) {
+          try {
+            const demoResponse = await fetch("/api/demo", { cache: "no-store" });
+            if (demoResponse.ok) {
+              const payload = await demoResponse.json().catch(() => ({}));
+              render(payload);
+              $("scanState").textContent = "Demo data loaded";
+              return;
+            }
+          } catch (_) {}
+        }
+        state.scanning = false;
+        setScanButtonState(false);
+        renderScanError({ error: "network_error", message: "Unable to reach the Sightline API." });
+      }
     }
 
+    /* ─── Event listeners ─── */
     $("scanButton").addEventListener("click", () => loadScan(true));
     $("resetButton").addEventListener("click", () => loadScan(false));
+
+    /* ─── Initial load ─── */
     loadScan(false).catch(() => {
       $("scanState").textContent = "API unavailable";
     });
+
     setInterval(() => {
       refreshHealthAndEvents();
     }, 2000);

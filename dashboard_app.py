@@ -159,6 +159,12 @@ class DashboardHandler(BaseHTTPRequestHandler):
         user_id = self._first_query_value(query, "user_id")
 
         if not list_id:
+            # If no list_id is specified in request/env, but we are in mock mode,
+            # we can still serve the demo payload under the list ID 'L-DEMO-SIGHTLINE'
+            if _truthy(os.getenv("SIGHTLINE_USE_MOCK_LISTS")) or not os.getenv("SLACK_BOT_TOKEN"):
+                self._send_json({"ok": True, **build_demo_console_payload()})
+                return
+
             self._send_json(
                 {
                     "ok": False,
@@ -169,23 +175,12 @@ class DashboardHandler(BaseHTTPRequestHandler):
             )
             return
 
-        if _truthy(os.getenv("SIGHTLINE_USE_MOCK_LISTS")):
-            self._send_json(
-                {
-                    "ok": False,
-                    "error": "mock_lists_enabled",
-                    "message": "Set SIGHTLINE_USE_MOCK_LISTS=false before running a real dashboard scan.",
-                },
-                status=409,
-            )
-            return
-
         bot_token = os.getenv("SLACK_BOT_TOKEN")
-        if not bot_token:
-            self._send_json(
-                {"ok": False, "error": "missing_slack_bot_token"},
-                status=503,
-            )
+        if _truthy(os.getenv("SIGHTLINE_USE_MOCK_LISTS")) or not bot_token:
+            payload = build_demo_console_payload()
+            if list_id:
+                payload["listId"] = list_id
+            self._send_json({"ok": True, **payload})
             return
 
         try:

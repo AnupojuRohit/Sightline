@@ -1,12 +1,12 @@
-import json
 import logging
-from datetime import datetime
 from typing import Any
 
 from services.gemini_service import GeminiService
 from services.runtime_status import increment_stat, record_event
 from services.scan_pipeline import run_slack_list_scan
 from ui.blocks import build_mismatch_blocks
+
+logger = logging.getLogger(__name__)
 
 LIST_ENTITY_TYPE = "slack#/types/list_id"
 _POSTED_MISMATCH_KEYS: set[str] = set()
@@ -130,25 +130,17 @@ def _print_app_context_changed_event(event: dict[str, Any]) -> None:
     context = event.get("context") or {}
     entities = context.get("entities") or event.get("entities") or []
 
-    print("=" * 50)
-    print("APP CONTEXT CHANGED EVENT")
-    print(f"TIMESTAMP: {datetime.now().isoformat(timespec='seconds')}")
-    print(f"event.type: {event.get('type')}")
-    print(f"event_context: {event.get('event_context')}")
-    print("entities:")
+    logger.debug(
+        "app_context_changed_event_received",
+        extra={
+            "event_type": event.get("type"),
+            "event_context": event.get("event_context"),
+            "entity_count": len(entities),
+            "entities": [
+                {"type": entity.get("type"), "value": entity.get("value")}
+                for entity in entities
+                if isinstance(entity, dict)
+            ],
+        },
+    )
 
-    for index, entity in enumerate(entities):
-        if isinstance(entity, dict):
-            entity_type = entity.get("type")
-            entity_value = entity.get("value")
-            print(f"  [{index}] type: {entity_type}")
-            print(f"  [{index}] value: {entity_value}")
-            if entity_type == LIST_ENTITY_TYPE:
-                print("FOUND SLACK LIST ID:")
-                print(entity_value)
-        else:
-            print(f"  [{index}] {entity}")
-
-    print("complete payload:")
-    print(json.dumps(event, indent=2, sort_keys=True, default=str))
-    print("=" * 50)
