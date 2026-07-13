@@ -1,151 +1,422 @@
-Sightline
-=========
+<div align="center">
 
-Sightline is a Slack-native Engineering Manager for Slack Lists. It watches the current Slack List context and stays silent unless deterministic evidence shows a task is stale.
+# 🚀 Sightline
 
-Core flow:
+### AI-powered Engineering Intelligence for Slack
 
-```text
-Slack List opened
--> app_context_changed
--> Slack List Loader
--> GitHub Checker
--> Slack RTS Checker
--> Mismatch Engine
--> one compact Block Kit card
--> Update Task or Dismiss
+Continuously verifies whether engineering planning matches engineering execution by correlating **Slack Lists**, **GitHub**, and **Slack conversations** to generate explainable, evidence-backed recommendations.
+
+<p align="center">
+
+![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)
+![Slack](https://img.shields.io/badge/Slack-Bolt-4A154B?style=for-the-badge&logo=slack)
+![GitHub](https://img.shields.io/badge/GitHub-API-black?style=for-the-badge&logo=github)
+![Gemini](https://img.shields.io/badge/Google-Gemini-4285F4?style=for-the-badge&logo=google)
+![Hackathon](https://img.shields.io/badge/Hackathon-2026-success?style=for-the-badge)
+
+</p>
+
+</div>
+
+---
+
+<p align="center">
+
+<img src="assets/hero-dashboard.png" width="100%">
+
+</p>
+
+---
+
+# 🎯 The Problem
+
+Engineering project boards become stale surprisingly fast.
+
+A pull request gets merged.
+
+QA approves the work.
+
+Slack confirms it's complete.
+
+Yet the project tracker still says **"Todo."**
+
+This disconnect forces engineering managers to manually verify project status across multiple tools, wasting time and reducing trust in planning systems.
+
+---
+
+# 💡 The Solution
+
+Sightline correlates information from three independent sources:
+
+```
+Slack Lists (Planning)
+          │
+          ▼
+ GitHub Repository (Execution)
+          │
+          ▼
+ Slack Conversations (Communication)
+          │
+          ▼
+ Evidence Correlation Engine
+          │
+          ▼
+ Explainable Recommendation
+          │
+          ▼
+ Slack Block Kit Action Card
 ```
 
-Sightline is not a chatbot, dashboard, or generic project summary tool. Rules decide whether a task is stale. Gemini only explains a deterministic finding after evidence exists.
+Instead of blindly changing project data, Sightline provides **transparent, evidence-backed recommendations** that engineering teams can confidently review and apply.
 
-Demo Console
-------------
+---
 
-Sightline also includes a local judge-facing demo console. It reports live integration readiness, the runtime event feed, and a visual scan payload for the demo video.
+# 🎥 Demo
 
-```powershell
-python dashboard_app.py
+<p align="center">
+
+<img src="assets/dashboard.gif" width="100%">
+
+</p>
+
+---
+
+# ✨ Features
+
+## 📋 Planning Intelligence
+
+- Slack Lists integration
+- Live planning status
+- Planning vs execution comparison
+- Planning mismatch detection
+
+---
+
+## ⚡ GitHub Intelligence
+
+- Live repository scanning
+- Pull Request analysis
+- Issue analysis
+- Commit history
+- Repository activity
+- Contributor insights
+
+---
+
+## 💬 Slack Intelligence
+
+- Slack Search (RTS)
+- QA confirmation discovery
+- Engineering discussion search
+- Communication evidence
+
+---
+
+## 🧠 AI Evidence Engine
+
+Instead of guessing, Sightline collects evidence from multiple sources.
+
+For every recommendation it explains:
+
+- Why the recommendation exists
+- Which GitHub events support it
+- Which Slack conversations support it
+- Planning state
+- Confidence level
+
+---
+
+## 💡 Repository Health
+
+Repository health is calculated using engineering signals such as:
+
+- Open Issues
+- Stale Pull Requests
+- Planning mismatches
+- Repository activity
+- Development freshness
+
+The score is fully explainable.
+
+---
+
+## 🔍 Engineering Activity Dashboard
+
+The dashboard provides a unified engineering view including:
+
+- Repository Health
+- Engineering Work Items
+- Recommendation Engine
+- Integration Status
+- Evidence Timeline
+- Live Event Feed
+- Risk Analysis
+
+---
+
+# 🖥 Dashboard
+
+## Repository Health
+
+<p align="center">
+<img src="assets/repo-health.png" width="90%">
+</p>
+
+---
+
+## Engineering Work Items
+
+<p align="center">
+<img src="assets/recommendation.png" width="90%">
+</p>
+
+---
+
+## Recommendation Evidence
+
+<p align="center">
+<img src="assets/evidence.png" width="90%">
+</p>
+
+---
+
+## Slack Block Kit Recommendation
+
+<p align="center">
+<img src="assets/slack-card.png" width="90%">
+</p>
+
+---
+
+# 🏗 Architecture
+
+<p align="center">
+
+<img src="assets/architecture.png" width="100%">
+
+</p>
+
+---
+
+# ⚙️ System Architecture
+
+```
+                    Slack Lists
+                 (Planning Source)
+                         │
+                         ▼
+              Slack List Loader
+                         │
+                         ▼
+                 Internal Task Model
+                         │
+        ┌────────────────┼────────────────┐
+        ▼                ▼                ▼
+ GitHub Checker     Slack Search     Analyzer
+ (Execution)       (Communication)  (Correlation)
+        │                │                │
+        └────────────────┼────────────────┘
+                         ▼
+               Evidence Builder
+                         ▼
+             Recommendation Engine
+                         ▼
+              Slack Block Kit Cards
+                         ▼
+                 Dashboard UI
+```
+
+---
+
+# 🧠 How Sightline Thinks
+
+For every engineering work item:
+
+1. Read planning state from Slack Lists.
+2. Analyze GitHub Pull Requests and Issues.
+3. Search Slack conversations for supporting evidence.
+4. Correlate all available information.
+5. Detect inconsistencies.
+6. Generate an explainable recommendation.
+7. Present supporting evidence.
+8. Allow engineering teams to review before applying updates.
+
+---
+
+# 🛠 Tech Stack
+
+## Backend
+
+- Python
+- Slack Bolt
+- Slack SDK
+- REST APIs
+
+## AI
+
+- Google Gemini
+- Evidence Correlation
+- Recommendation Engine
+
+## Integrations
+
+- GitHub REST API
+- Slack Lists API
+- Slack Search API
+- Socket Mode
+
+## Frontend
+
+- HTML
+- CSS
+- Vanilla JavaScript
+
+---
+
+# 📂 Project Structure
+
+```
+.
+├── core/
+├── handlers/
+├── models/
+├── services/
+├── templates/
+├── ui/
+├── tests/
+├── assets/
+├── app.py
+└── dashboard_app.py
+```
+
+---
+
+# 🔄 Demo Flow
+
+```
+Run Scan
+
+        │
+
+        ▼
+
+Connect to GitHub
+
+        │
+
+        ▼
+
+Analyze Pull Requests
+
+        │
+
+        ▼
+
+Search Slack Conversations
+
+        │
+
+        ▼
+
+Correlate Evidence
+
+        │
+
+        ▼
+
+Generate Recommendations
+
+        │
+
+        ▼
+
+Present Block Kit Cards
+
+        │
+
+        ▼
+
+Engineering Manager Reviews
+
+        │
+
+        ▼
+
+Update Planning
+```
+
+---
+
+# 🚀 Getting Started
+
+```bash
+git clone https://github.com/AnupojuRohit/Sightline.git
+
+cd Sightline
+
+python -m venv .venv
+
+source .venv/bin/activate
+
+pip install -r requirements.txt
+
+python app.py
 ```
 
 Open:
 
-```text
+```
 http://127.0.0.1:5001
 ```
 
-Use the console to show:
+---
 
-- Project health and risk signals.
-- Current Slack List status vs Sightline's recommended status.
-- GitHub and Slack evidence behind each stale-task finding.
-- A Slack alert preview that matches the product workflow.
-- Live integration status: Slack tokens, GitHub token, RTS OAuth config, and user-token presence.
-- Runtime pipeline events: context changed, list loaded, GitHub checked, RTS checked, engine ran, card posted.
+# 🌟 Why Sightline?
 
-Setup
------
+Modern engineering teams rely on multiple systems:
 
-1. Create a Slack app with Socket Mode enabled.
-2. Add the bot token, app-level token, and OAuth client settings to `.env`.
-3. Install dependencies.
-4. Start the app.
+- Planning
+- Code
+- Communication
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-python app.py
-```
+These systems frequently drift apart.
 
-Environment
------------
+Sightline bridges that gap by continuously validating engineering work against multiple sources of truth and surfacing explainable recommendations before planning becomes outdated.
 
-Required:
+---
 
-```text
-SLACK_BOT_TOKEN=
-SLACK_APP_TOKEN=
-SLACK_CLIENT_ID=
-SLACK_CLIENT_SECRET=
-SLACK_OAUTH_REDIRECT_URI=
-```
+# 🔮 Future Roadmap
 
-Optional:
+- Jira Integration
+- Linear Integration
+- Azure DevOps
+- GitLab
+- Microsoft Teams
+- Notion
+- Multi-repository support
+- Historical trend analysis
+- Organization-wide engineering insights
 
-```text
-SIGHTLINE_TOKEN_STORE_PATH=.token_store.json
-GITHUB_TOKEN=
-GITHUB_CACHE_TTL_SECONDS=180
-GEMINI_API_KEY=
-GEMINI_MODEL=gemini-2.5-flash
-LOG_LEVEL=INFO
-SLACK_AUTH_TEST_ON_STARTUP=false
-SIGHTLINE_USE_MOCK_LISTS=false
-SIGHTLINE_ENABLE_LIST_UPDATES=false
-SIGHTLINE_ENABLE_AI_EXPLANATIONS=false
-```
+---
 
-Required Slack scopes
----------------------
+# 👨💻 Built For
 
-Bot scopes:
+Engineering Managers
 
-- `app_home:read`
-- `chat:write`
+Tech Leads
 
-User scopes:
+Product Managers
 
-- `search:read` (required for live RTS search)
+Platform Teams
 
-OAuth setup for RTS live search
--------------------------------
+Developer Experience Teams
 
-1. Start the app and open `http://127.0.0.1:5001/slack/oauth/authorize`.
-   - The short alias `http://127.0.0.1:5001/authorize` is also supported.
-2. Complete Slack OAuth consent for `search:read`.
-3. Confirm a local token file is created at `SIGHTLINE_TOKEN_STORE_PATH`.
-4. Trigger a real list context event; RTS searches will use the OAuth user token.
+---
 
-GitHub live evidence
---------------------
+<div align="center">
 
-Set `GITHUB_TOKEN` to enable live REST lookups for GitHub issue and PR URLs found in Slack List rows. When configured, live GitHub state wins over embedded/mock metadata. If the API is unavailable or rate-limited, Sightline logs a clear warning and falls back to metadata when available.
+## ⭐ If you found Sightline interesting, consider giving it a star!
 
-Demo Mode
----------
+Built with ❤️ for the Slack Hackathon.
 
-Set `SIGHTLINE_USE_MOCK_LISTS=true` for hackathon judging if Slack Lists API access returns `list_not_found`. In mock mode, Sightline loads deterministic demo tasks and the Update button completes without calling Slack Lists update APIs.
-
-Keep `SIGHTLINE_ENABLE_AI_EXPLANATIONS=false` for the fastest live demo. When it is false, Sightline still posts a deterministic explanation and does not wait on Gemini.
-
-Deployment
-----------
-
-Docker:
-
-```powershell
-docker compose up --build
-```
-
-Production notes:
-
-- Keep `.env` out of git.
-- Use least-privilege Slack scopes.
-- Enable `SIGHTLINE_ENABLE_LIST_UPDATES=true` only after validating the Slack Lists update payload in the target workspace.
-- Keep `SIGHTLINE_USE_MOCK_LISTS=false` for the real recording so Slack Lists are loaded from the workspace.
-
-Verification
-------------
-
-```powershell
-python -m compileall app.py core handlers models services ui prompts
-python -m unittest discover -s tests
-```
-
-Manual live checks for the final recording:
-
-- OAuth: open `/authorize`, complete Slack consent, verify `.token_store.json` is created, then call `/api/health` and confirm `rts.userTokenPresent` is true.
-- RTS: trigger a Slack List row whose title or GitHub reference appears in a real Slack message and confirm the card evidence includes the Slack search result.
-- GitHub: reference a real issue or PR URL and confirm the returned state matches GitHub in the browser.
-- Slack Lists: with `SIGHTLINE_USE_MOCK_LISTS=false`, click Update on a real card and confirm the row changes only when `SIGHTLINE_ENABLE_LIST_UPDATES=true`.
-- Silence proof: open a non-stale row and confirm no Slack message is posted.
+</div>

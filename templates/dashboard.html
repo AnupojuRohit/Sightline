@@ -5,47 +5,83 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Sightline — evidence-backed engineering intelligence. Correlates GitHub activity with Slack conversations and planning boards.">
   <title>Sightline Operations Console</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='18' width='100' height='100' fill='%231f8a5b'/><path d='M28 52l16 16 28-32' fill='none' stroke='white' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='18' width='100' height='100' fill='%230f172a'/><path d='M28 52l16 16 28-32' fill='none' stroke='white' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: light;
-      --ink: #17211d;
-      --muted: #66736e;
-      --line: #dbe2df;
-      --panel: #ffffff;
-      --page: #f6f7f4;
-      --green: #1f8a5b;
-      --green-soft: #dff3e9;
-      --red: #c44032;
-      --red-soft: #f8dfdc;
-      --amber: #bd7b16;
-      --amber-soft: #f9ebcf;
-      --blue: #286fbb;
-      --blue-soft: #dfeafa;
-      --shadow: 0 14px 34px rgba(35, 45, 40, 0.08);
-      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --bg: #fafafa;
+      --card-bg: #ffffff;
+      --border: rgba(0, 0, 0, 0.06);
+      --border-hover: rgba(0, 0, 0, 0.12);
+      
+      /* Restrained Premium Color Palette */
+      --ink: #0f172a;
+      --muted: #475569;
+      --muted-light: #94a3b8;
+      
+      --green: #0891b2;
+      --green-solid: #0284c7;
+      --green-soft: rgba(14, 116, 144, 0.06);
+      
+      --accent: #0f766e;
+      --accent-soft: rgba(15, 118, 110, 0.05);
+
+      --red: #e11d48;
+      --red-soft: rgba(225, 29, 72, 0.05);
+
+      --amber: #d97706;
+      --amber-soft: rgba(217, 119, 6, 0.05);
+
+      --blue: #2563eb;
+      --blue-soft: rgba(37, 99, 235, 0.05);
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.02), 0 4px 6px -4px rgba(0, 0, 0, 0.02);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * {
       box-sizing: border-box;
+      outline: none;
     }
 
     body {
       margin: 0;
-      background: var(--page);
+      background: var(--bg);
       color: var(--ink);
-      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      letter-spacing: -0.006em;
+      font-family: var(--font-sans);
+      letter-spacing: -0.011em;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
 
-    button,
-    input {
-      font: inherit;
+    /* Custom Minimalist Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 99px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.16);
+    }
+
+    button, input {
+      font-family: inherit;
     }
 
     .app {
@@ -56,15 +92,15 @@
 
     /* ─── Topbar ─── */
     .topbar {
-      height: 68px;
+      height: 64px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 28px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      padding: 0 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       position: sticky;
       top: 0;
       z-index: 3;
@@ -78,103 +114,116 @@
     }
 
     .brand-mark {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      background:
-        linear-gradient(135deg, #1f8a5b 0 48%, transparent 48%),
-        linear-gradient(315deg, #286fbb 0 44%, #f6c85f 44% 62%, #ffffff 62%);
-      border: 1px solid rgba(23, 33, 29, 0.14);
-      box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.65);
-      flex: 0 0 auto;
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--ink) 0%, #334155 100%);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 14px;
     }
 
     .brand h1 {
       margin: 0;
-      font-size: 18px;
+      font-size: 15px;
       line-height: 1.1;
-      font-weight: 800;
-      letter-spacing: -0.02em;
+      font-weight: 600;
+      letter-spacing: -0.022em;
     }
 
     .brand p {
-      margin: 3px 0 0;
+      margin: 2px 0 0;
       color: var(--muted);
-      font-size: 12px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 48vw;
+      font-size: 11px;
     }
 
     .toolbar {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .status-pill {
-      min-height: 34px;
+      min-height: 32px;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 0 12px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: #fff;
+      gap: 6px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card-bg);
       color: var(--muted);
-      font-size: 13px;
-      white-space: nowrap;
-      transition: all var(--transition);
+      font-size: 12px;
+      font-weight: 500;
     }
 
     .dot {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
       border-radius: 99px;
-      background: var(--green);
-      box-shadow: 0 0 0 4px var(--green-soft);
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
       transition: all var(--transition);
     }
 
     .dot.scanning {
       background: var(--blue);
-      box-shadow: 0 0 0 4px var(--blue-soft);
+      box-shadow: 0 0 0 3px var(--blue-soft);
       animation: pulse-dot 1.2s ease-in-out infinite;
     }
 
     @keyframes pulse-dot {
       0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.5); opacity: 0.6; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    .list-input {
+      width: 180px;
+      min-height: 32px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card-bg);
+      color: var(--ink);
+      padding: 0 10px;
+      font-size: 12px;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .list-input:focus {
+      border-color: #cbd5e1;
+      box-shadow: var(--shadow-sm);
     }
 
     .button {
-      min-height: 38px;
+      min-height: 32px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding: 0 14px;
-      border: 1px solid #176d48;
-      border-radius: 8px;
-      background: var(--green);
-      color: #fff;
-      font-weight: 700;
-      font-size: 13px;
+      gap: 6px;
+      padding: 0 12px;
+      border: 1px solid var(--ink);
+      border-radius: var(--radius-sm);
+      background: var(--ink);
+      color: white;
+      font-weight: 600;
+      font-size: 12px;
       cursor: pointer;
-      box-shadow: 0 8px 18px rgba(31, 138, 91, 0.2);
+      box-shadow: var(--shadow-sm);
       transition: all var(--transition);
     }
 
     .button:hover:not(:disabled) {
-      background: #1a7a50;
-      box-shadow: 0 12px 28px rgba(31, 138, 91, 0.28);
-      transform: translateY(-1px);
+      background: #1e293b;
+      border-color: #1e293b;
+      transform: translateY(-0.5px);
     }
 
     .button:active:not(:disabled) {
       transform: translateY(0);
-      box-shadow: 0 4px 10px rgba(31, 138, 91, 0.15);
     }
 
     .button:disabled {
@@ -182,125 +231,90 @@
       cursor: not-allowed;
     }
 
-    .list-input {
-      width: min(220px, 24vw);
-      min-height: 38px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-      color: var(--ink);
-      padding: 0 10px;
-      font-size: 13px;
-      transition: border-color var(--transition), box-shadow var(--transition);
-    }
-
-    .list-input:focus {
-      outline: none;
-      border-color: var(--green);
-      box-shadow: 0 0 0 3px var(--green-soft);
-    }
-
     .button.secondary {
       color: var(--ink);
-      background: #fff;
-      border-color: var(--line);
-      box-shadow: none;
+      background: var(--card-bg);
+      border-color: var(--border);
+      box-shadow: var(--shadow-sm);
     }
 
     .button.secondary:hover:not(:disabled) {
-      background: #f8f9f8;
-      border-color: #c8d0cc;
-      box-shadow: none;
-      transform: translateY(-1px);
-    }
-
-    .button-icon {
-      width: 18px;
-      height: 18px;
-      border-radius: 99px;
-      display: inline-grid;
-      place-items: center;
-      color: inherit;
-      border: 1px solid currentColor;
-      font-size: 12px;
-      line-height: 1;
-      transition: transform var(--transition);
+      background: #f8fafc;
+      border-color: #cbd5e1;
     }
 
     /* ─── Layout ─── */
     .layout {
-      width: min(1440px, 100%);
+      width: min(1520px, 100%);
       margin: 0 auto;
-      padding: 24px 28px 32px;
+      padding: 24px;
       display: grid;
-      grid-template-columns: 310px minmax(0, 1fr);
-      gap: 18px;
-    }
-
-    .sidebar,
-    .main-grid,
-    .right-stack {
-      min-width: 0;
+      grid-template-columns: 290px minmax(0, 1fr);
+      gap: 20px;
     }
 
     .sidebar {
       display: grid;
-      gap: 14px;
+      gap: 16px;
       align-content: start;
     }
 
-    /* ─── Panel ─── */
+    /* ─── Cards / Panels ─── */
     .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      box-shadow: var(--shadow);
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
       min-width: 0;
-      animation: panel-in 0.5s ease both;
-      transition: box-shadow var(--transition);
+      animation: panel-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+      transition: box-shadow var(--transition), border-color var(--transition);
     }
 
     .panel:hover {
-      box-shadow: 0 18px 44px rgba(35, 45, 40, 0.1);
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-md);
     }
 
     @keyframes panel-in {
-      from { opacity: 0; transform: translateY(12px); }
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     .panel-header {
-      min-height: 50px;
+      min-height: 48px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--line);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
     }
 
     .panel-title {
       margin: 0;
-      font-size: 14px;
-      font-weight: 760;
-      letter-spacing: -0.01em;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .panel-kicker {
-      margin: 2px 0 0;
+      margin: 1px 0 0;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
     }
 
-    /* ─── Score ─── */
+    /* ─── Score / Health breakdown ─── */
     .score {
-      padding: 18px 16px 16px;
+      padding: 16px;
       display: grid;
-      gap: 16px;
+      gap: 12px;
     }
 
     .score-ring {
-      width: 168px;
+      width: 140px;
       aspect-ratio: 1;
       margin: 0 auto;
       border-radius: 999px;
@@ -308,24 +322,24 @@
       place-items: center;
       background:
         radial-gradient(circle at center, #fff 0 58%, transparent 59%),
-        conic-gradient(var(--green) calc(var(--score) * 1%), #e8ece9 0);
-      border: 1px solid var(--line);
+        conic-gradient(var(--accent) calc(var(--score) * 1%), #f1f5f9 0);
+      border: 1px solid var(--border);
       transition: background 0.8s ease;
     }
 
     .score-ring strong {
       display: block;
-      font-size: 42px;
+      font-size: 34px;
       line-height: 1;
+      font-weight: 700;
       letter-spacing: -0.03em;
-      transition: color var(--transition);
     }
 
     .score-ring span {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 10px;
       display: block;
-      margin-top: 4px;
+      margin-top: 2px;
       text-align: center;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -335,43 +349,44 @@
     .metric-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
+      gap: 8px;
     }
 
     .metric {
-      min-height: 88px;
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fbfcfb;
+      min-height: 72px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: #fafafa;
       display: grid;
       align-content: space-between;
-      gap: 8px;
+      gap: 4px;
       transition: border-color var(--transition), background var(--transition);
     }
 
     .metric:hover {
-      border-color: #c8d0cc;
-      background: #f6f8f7;
+      border-color: var(--border-hover);
+      background: #f8fafc;
     }
 
     .metric b {
-      font-size: 24px;
+      font-size: 18px;
       line-height: 1;
+      font-weight: 600;
       letter-spacing: -0.02em;
     }
 
     .metric span {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
     }
 
     /* ─── Main Grid ─── */
     .main-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.35fr) minmax(330px, 0.65fr);
-      gap: 18px;
+      grid-template-columns: minmax(0, 1.35fr) minmax(310px, 0.65fr);
+      gap: 16px;
       align-items: start;
     }
 
@@ -379,22 +394,20 @@
       grid-column: 1 / -1;
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
-      gap: 18px;
+      gap: 16px;
       align-items: center;
-      padding: 18px;
-      border-radius: 8px;
-      border: 1px solid #cbd7d1;
-      background:
-        linear-gradient(90deg, rgba(223, 243, 233, 0.95), rgba(255, 255, 255, 0.95)),
-        repeating-linear-gradient(135deg, rgba(31, 138, 91, 0.08) 0 1px, transparent 1px 18px);
-      box-shadow: var(--shadow);
-      animation: panel-in 0.4s ease both;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+      box-shadow: var(--shadow-sm);
     }
 
     .scan-band h2 {
-      margin: 0 0 6px;
-      font-size: 22px;
-      line-height: 1.15;
+      margin: 0 0 4px;
+      font-size: 16px;
+      line-height: 1.25;
+      font-weight: 600;
       letter-spacing: -0.02em;
     }
 
@@ -402,60 +415,54 @@
       margin: 0;
       max-width: 760px;
       color: var(--muted);
-      font-size: 14px;
-      line-height: 1.45;
+      font-size: 12px;
+      line-height: 1.4;
     }
 
     .signal-map {
-      min-width: 260px;
+      min-width: 240px;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+      gap: 6px;
     }
 
     .signal-node {
-      min-height: 48px;
-      border-radius: 8px;
-      background: #fff;
-      border: 1px solid var(--line);
+      min-height: 38px;
+      border-radius: var(--radius-sm);
+      background: var(--card-bg);
+      border: 1px solid var(--border);
       display: grid;
       place-items: center;
       color: var(--muted);
-      font-size: 11px;
-      font-weight: 740;
+      font-size: 10px;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.02em;
-      transition: all 0.35s ease;
+      letter-spacing: 0.03em;
+      transition: all 0.25s ease;
     }
 
     .signal-node.active {
-      color: #0f5f3d;
-      background: var(--green-soft);
-      border-color: #b9dec9;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-color: rgba(15, 118, 110, 0.2);
     }
 
     .signal-node.scanning {
-      color: #174e87;
+      color: var(--blue);
       background: var(--blue-soft);
-      border-color: #bed2ee;
-      animation: pulse-node 1s ease-in-out infinite;
+      border-color: rgba(37, 99, 235, 0.2);
+      animation: pulse-node 1.2s ease-in-out infinite;
     }
 
     @keyframes pulse-node {
       0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+      50% { opacity: 0.6; }
     }
 
     .signal-node.done {
-      color: #0f5f3d;
-      background: var(--green-soft);
-      border-color: #b9dec9;
-    }
-
-    .signal-node.waiting {
-      color: var(--muted);
-      background: #fff;
-      border-color: var(--line);
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-color: rgba(15, 118, 110, 0.2);
     }
 
     /* ─── Table ─── */
@@ -466,31 +473,26 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 720px;
+      min-width: 700px;
     }
 
-    th,
-    td {
+    th, td {
       text-align: left;
-      padding: 13px 16px;
-      border-bottom: 1px solid var(--line);
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
       vertical-align: middle;
-      font-size: 13px;
+      font-size: 12px;
     }
 
     th {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.04em;
       font-weight: 600;
-      background: #fbfcfb;
+      background: #fafafa;
       position: sticky;
       top: 0;
-    }
-
-    tr:last-child td {
-      border-bottom: 0;
     }
 
     tbody tr {
@@ -499,207 +501,192 @@
     }
 
     tbody tr:hover {
-      background: #f8faf9;
+      background: #fafafa;
     }
 
     tbody tr.active-row {
-      background: #f0f5f2;
-      border-left: 3px solid var(--green);
+      background: #f1f5f9;
+      border-left: 2px solid var(--ink);
     }
 
     .task-title {
-      font-weight: 700;
-      margin-bottom: 4px;
+      font-weight: 600;
+      margin-bottom: 2px;
+      font-size: 12.5px;
+      letter-spacing: -0.015em;
     }
 
     .task-desc {
       color: var(--muted);
-      max-width: 360px;
-      line-height: 1.35;
+      max-width: 320px;
+      line-height: 1.3;
       font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* ─── Badges ─── */
     .badge {
       display: inline-flex;
       align-items: center;
-      min-height: 24px;
-      padding: 0 9px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: #fff;
+      min-height: 20px;
+      padding: 0 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: #fafafa;
       color: var(--ink);
       white-space: nowrap;
-      font-size: 11px;
-      font-weight: 700;
-      transition: transform var(--transition);
+      font-size: 10px;
+      font-weight: 500;
     }
 
     .badge.red {
       background: var(--red-soft);
-      border-color: #efc4bf;
-      color: #8f241b;
+      border-color: rgba(225, 29, 72, 0.15);
+      color: var(--red);
     }
 
     .badge.green {
       background: var(--green-soft);
-      border-color: #b9dec9;
-      color: #0f5f3d;
+      border-color: rgba(14, 116, 144, 0.15);
+      color: var(--green);
     }
 
     .badge.amber {
       background: var(--amber-soft);
-      border-color: #efd49d;
-      color: #7b4a09;
+      border-color: rgba(217, 119, 6, 0.15);
+      color: var(--amber);
     }
 
     .badge.blue {
       background: var(--blue-soft);
-      border-color: #bed2ee;
-      color: #174e87;
+      border-color: rgba(37, 99, 235, 0.15);
+      color: var(--blue);
     }
 
-    /* ─── Right Stack ─── */
+    /* ─── Right Sidebar Stack ─── */
     .right-stack {
       display: grid;
-      gap: 14px;
+      gap: 16px;
     }
 
     .status-list {
       display: grid;
-      gap: 8px;
-      padding: 12px 16px 16px;
+      gap: 6px;
+      padding: 10px 14px 14px;
     }
 
     .status-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fbfcfb;
-      padding: 10px 12px;
-      font-size: 13px;
-      transition: border-color var(--transition), background var(--transition);
-    }
-
-    .status-row:hover {
-      border-color: #c8d0cc;
-      background: #f6f8f7;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: #fafafa;
+      padding: 8px 10px;
+      font-size: 12px;
     }
 
     .status-row b {
-      font-size: 13px;
-      font-weight: 740;
+      font-size: 11.5px;
+      font-weight: 600;
     }
 
     .feed-list {
       display: grid;
-      gap: 8px;
-      padding: 12px 16px 16px;
-      max-height: 260px;
+      gap: 6px;
+      padding: 10px 14px 14px;
+      max-height: 220px;
       overflow: auto;
     }
 
     .feed-item {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fbfcfb;
-      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: #fafafa;
+      padding: 8px 10px;
       display: grid;
-      gap: 4px;
-      transition: border-color var(--transition);
-      animation: fade-in 0.3s ease both;
-    }
-
-    .feed-item:hover {
-      border-color: #c8d0cc;
-    }
-
-    @keyframes fade-in {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+      gap: 3px;
     }
 
     .feed-item strong {
-      font-size: 12px;
-      font-weight: 760;
+      font-size: 11px;
+      font-weight: 600;
     }
 
     .feed-item p {
       margin: 0;
       color: var(--muted);
-      font-size: 12px;
-      line-height: 1.35;
+      font-size: 11px;
+      line-height: 1.3;
     }
 
     /* ─── Timeline ─── */
     .timeline {
-      padding: 4px 16px 16px;
+      padding: 4px 14px 14px;
     }
 
     .timeline-row {
       display: grid;
-      grid-template-columns: 18px minmax(0, 1fr);
-      gap: 10px;
-      padding-top: 14px;
-      animation: fade-in 0.35s ease both;
+      grid-template-columns: 14px minmax(0, 1fr);
+      gap: 8px;
+      padding-top: 10px;
     }
 
     .timeline-pin {
-      width: 10px;
-      height: 10px;
+      width: 6px;
+      height: 6px;
       border-radius: 99px;
       background: var(--blue);
       margin-top: 4px;
-      box-shadow: 0 0 0 4px var(--blue-soft);
-      transition: background var(--transition), box-shadow var(--transition);
+      box-shadow: 0 0 0 3px var(--blue-soft);
     }
 
     .timeline-row:last-child .timeline-pin {
-      background: var(--green);
-      box-shadow: 0 0 0 4px var(--green-soft);
+      background: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
     }
 
     .timeline-row h3 {
-      margin: 0 0 3px;
-      font-size: 13px;
+      margin: 0 0 2px;
+      font-size: 12px;
+      font-weight: 600;
     }
 
     .timeline-row p {
       margin: 0;
       color: var(--muted);
-      font-size: 12px;
-      line-height: 1.4;
+      font-size: 11px;
+      line-height: 1.35;
     }
 
-    /* ─── Alert Preview ─── */
+    /* ─── Alert Details Card ─── */
     .alert-preview {
-      padding: 16px;
+      padding: 14px;
     }
 
     .slack-card {
-      border: 1px solid #d8dee4;
-      border-left: 4px solid var(--red);
-      border-radius: 8px;
-      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
       background: #fff;
-      animation: fade-in 0.4s ease both;
     }
 
     .slack-card h3 {
-      margin: 0 0 10px;
-      font-size: 15px;
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 600;
     }
 
     .slack-line {
       display: grid;
-      grid-template-columns: 112px minmax(0, 1fr);
+      grid-template-columns: 96px minmax(0, 1fr);
       gap: 8px;
-      padding: 6px 0;
-      border-top: 1px solid #edf0ee;
-      font-size: 13px;
+      padding: 5px 0;
+      border-top: 1px solid #f1f5f9;
+      font-size: 11.5px;
     }
 
     .slack-line:first-of-type {
@@ -710,31 +697,25 @@
       color: var(--muted);
     }
 
-    /* ─── Evidence ─── */
+    /* ─── Evidence Feed ─── */
     .evidence-list {
       display: grid;
-      gap: 10px;
-      padding: 14px 16px 16px;
+      gap: 8px;
+      padding: 10px 14px 14px;
     }
 
     .evidence-item {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 12px;
-      background: #fbfcfb;
-      transition: border-color var(--transition);
-      animation: fade-in 0.35s ease both;
-    }
-
-    .evidence-item:hover {
-      border-color: #c8d0cc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      background: #fafafa;
     }
 
     .evidence-top {
       display: flex;
       justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 6px;
+      gap: 8px;
+      margin-bottom: 4px;
     }
 
     .evidence-top b,
@@ -745,69 +726,34 @@
     .evidence-item p {
       margin: 0;
       color: var(--muted);
-      font-size: 12px;
-      line-height: 1.42;
-    }
-
-    /* ─── Risks ─── */
-    .risk-list {
-      display: grid;
-      gap: 10px;
-      padding: 14px 16px 16px;
-      max-height: 280px;
-      overflow: auto;
-    }
-
-    .risk-item {
-      display: grid;
-      gap: 6px;
-      padding: 11px 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fbfcfb;
-      transition: border-color var(--transition);
-      animation: fade-in 0.3s ease both;
-    }
-
-    .risk-item:hover {
-      border-color: #c8d0cc;
-    }
-
-    .risk-item b {
-      font-size: 13px;
-    }
-
-    .risk-item p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       line-height: 1.35;
     }
 
-    /* ─── Empty State ─── */
+    /* ─── Empty states ─── */
     .empty-state {
       color: var(--muted);
-      font-size: 13px;
-      padding: 24px 16px;
+      font-size: 11.5px;
+      padding: 20px 12px;
       text-align: center;
-      line-height: 1.5;
+      line-height: 1.45;
     }
 
     .empty-state .empty-icon {
       display: block;
-      font-size: 28px;
-      margin-bottom: 8px;
+      font-size: 20px;
+      margin-bottom: 6px;
       opacity: 0.5;
     }
 
     .empty-state .empty-hint {
       display: block;
-      font-size: 12px;
-      margin-top: 4px;
+      font-size: 10.5px;
+      margin-top: 2px;
       opacity: 0.7;
     }
 
-    /* ─── Shimmer Loading ─── */
+    /* ─── Shimmer / Loader ─── */
     .shimmer {
       position: relative;
       overflow: hidden;
@@ -820,7 +766,7 @@
       background: linear-gradient(
         90deg,
         transparent 0%,
-        rgba(255, 255, 255, 0.5) 50%,
+        rgba(255, 255, 255, 0.4) 50%,
         transparent 100%
       );
       animation: shimmer 1.5s ease-in-out infinite;
@@ -831,27 +777,27 @@
       100% { transform: translateX(100%); }
     }
 
-    /* ─── Scan Progress ─── */
+    /* ─── Timed loader styles ─── */
     .scan-progress {
-      padding: 16px;
+      padding: 12px;
       display: grid;
-      gap: 10px;
+      gap: 8px;
     }
 
     .scan-step {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 13px;
+      gap: 8px;
+      font-size: 12px;
       color: var(--muted);
-      transition: all 0.3s ease;
       opacity: 0.4;
+      transition: all var(--transition);
     }
 
     .scan-step.active {
       color: var(--ink);
       opacity: 1;
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .scan-step.done {
@@ -860,29 +806,28 @@
     }
 
     .scan-step-dot {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
       border-radius: 99px;
       background: var(--line);
       flex-shrink: 0;
-      transition: all 0.3s ease;
+      transition: all var(--transition);
     }
 
     .scan-step.active .scan-step-dot {
       background: var(--blue);
-      box-shadow: 0 0 0 3px var(--blue-soft);
+      box-shadow: 0 0 0 2px var(--blue-soft);
       animation: pulse-dot 1s ease-in-out infinite;
     }
 
     .scan-step.done .scan-step-dot {
       background: var(--green);
-      box-shadow: 0 0 0 3px var(--green-soft);
+      box-shadow: 0 0 0 2px var(--green-soft);
     }
 
-    /* ─── Spinner ─── */
     .spinner {
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       border: 2px solid rgba(255,255,255,0.3);
       border-top-color: #fff;
       border-radius: 50%;
@@ -892,70 +837,13 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-
-    /* ─── Responsive ─── */
-    @media (max-width: 1080px) {
-      .layout,
-      .main-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      }
-
-      .scan-band {
-        grid-template-columns: 1fr;
-      }
-
-      .signal-map {
-        min-width: 0;
-      }
-    }
-
-    @media (max-width: 720px) {
-      .topbar {
-        height: auto;
-        align-items: flex-start;
-        padding: 14px 16px;
-        gap: 12px;
-        flex-direction: column;
-      }
-
-      .toolbar {
-        width: 100%;
-      }
-
-      .button,
-      .list-input,
-      .status-pill {
-        flex: 1;
-      }
-
-      .layout {
-        padding: 16px;
-      }
-
-      .sidebar {
-        grid-template-columns: 1fr;
-      }
-
-      .metric-grid,
-      .signal-map {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .scan-band h2 {
-        font-size: 19px;
-      }
-    }
   </style>
 </head>
 <body>
   <div class="app">
     <header class="topbar">
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true"></div>
+        <div class="brand-mark" aria-hidden="true">S</div>
         <div>
           <h1>Sightline</h1>
           <p id="listLabel">AnupojuRohit/Sightline · GitHub Intelligence</p>
@@ -965,11 +853,15 @@
         <div class="status-pill"><span class="dot" id="statusDot" aria-hidden="true"></span><span id="scanState">Ready</span></div>
         <input class="list-input" id="listIdInput" type="text" autocomplete="off" placeholder="Slack List ID (optional)">
         <button class="button secondary" type="button" id="resetButton" title="Refresh real scan">
-          <span class="button-icon" aria-hidden="true">↻</span>
+          <span class="button-icon" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          </span>
           Refresh
         </button>
         <button class="button" type="button" id="scanButton" title="Run the Sightline scan">
-          <span class="button-icon" id="scanButtonIcon" aria-hidden="true">▶</span>
+          <span class="button-icon" id="scanButtonIcon" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </span>
           <span id="scanButtonLabel">Run Scan</span>
         </button>
       </div>
@@ -980,7 +872,10 @@
         <section class="panel" style="animation-delay: 0.05s">
           <div class="panel-header">
             <div>
-              <h2 class="panel-title">Repository Health</h2>
+              <h2 class="panel-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                Repository Health
+              </h2>
               <p class="panel-kicker">Real-time health score</p>
             </div>
             <span class="badge green" id="generatedAt">Now</span>
@@ -992,19 +887,19 @@
                 <span>score</span>
               </div>
             </div>
-            <div id="healthBreakdown" style="font-size: 11px; color: var(--muted); border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px;">
+            <div id="healthBreakdown" style="font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px;">
               <strong style="display: block; margin-bottom: 6px; color: var(--ink);">Health Score Breakdown:</strong>
               <div id="healthDeductionsList" style="display: grid; gap: 5px;">
                 <div style="display: flex; justify-content: space-between;"><span>Baseline Score</span><b>100</b></div>
               </div>
             </div>
-            <div class="metric-grid" style="border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px;">
+            <div class="metric-grid" style="border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px;">
               <div class="metric"><b id="openPRs">—</b><span>Open PRs</span></div>
               <div class="metric"><b id="mergedPRs">—</b><span>Merged PRs</span></div>
               <div class="metric"><b id="openIssues">—</b><span>Open Issues</span></div>
               <div class="metric"><b id="staleWork">—</b><span>Stale Work</span></div>
             </div>
-            <div style="border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; font-size: 11px; color: var(--muted);">
+            <div style="border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; font-size: 11px; color: var(--muted);">
               <strong style="color: var(--ink);">Latest Commit:</strong>
               <p id="latestCommit" style="margin: 4px 0 0; line-height: 1.35; font-style: italic;">—</p>
             </div>
@@ -1014,7 +909,10 @@
         <section class="panel" style="animation-delay: 0.1s">
           <div class="panel-header">
             <div>
-              <h2 class="panel-title">Operational Risks</h2>
+              <h2 class="panel-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Operational Risks
+              </h2>
               <p class="panel-kicker">Actionable engineering risks</p>
             </div>
             <span class="badge amber" id="riskCount">0</span>
@@ -1046,12 +944,15 @@
         <section class="panel" style="animation-delay: 0.15s">
           <div class="panel-header">
             <div>
-              <h2 class="panel-title">Engineering Work Items</h2>
+              <h2 class="panel-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Engineering Work Items
+              </h2>
               <p class="panel-kicker">Correlating live GitHub commits/PRs with Slack planning status</p>
             </div>
             <span class="badge blue" id="readiness">Planning Sync: —</span>
           </div>
-          <div id="planningEmptyAlert" style="display:none; padding: 12px 16px; background: #fffdf5; border-bottom: 1px solid var(--line); color: #7b5900; font-size: 13px;">
+          <div id="planningEmptyAlert" style="display:none; padding: 10px 16px; background: #fffbeb; border-bottom: 1px solid var(--border); color: #b45309; font-size: 12px; font-weight: 500;">
             ⚠️ <strong>No planning items found:</strong> This Slack List currently contains no task cards. Live repository branches are listed below as unmapped engineering changes.
           </div>
           <div class="table-wrap">
@@ -1083,7 +984,10 @@
           <section class="panel" style="animation-delay: 0.2s">
             <div class="panel-header">
               <div>
-                <h2 class="panel-title">Integration Status</h2>
+                <h2 class="panel-title">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                  Integration Status
+                </h2>
                 <p class="panel-kicker">Live readiness snapshot</p>
               </div>
             </div>
@@ -1098,7 +1002,10 @@
           <section class="panel" style="animation-delay: 0.25s">
             <div class="panel-header">
               <div>
-                <h2 class="panel-title">Live Event Feed</h2>
+                <h2 class="panel-title">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+                  Live Event Feed
+                </h2>
                 <p class="panel-kicker">Context → evidence → action trail</p>
               </div>
               <span class="badge blue" id="lastEventAt">No events</span>
@@ -1114,7 +1021,10 @@
           <section class="panel" style="animation-delay: 0.3s">
             <div class="panel-header">
               <div>
-                <h2 class="panel-title">Evidence Timeline</h2>
+                <h2 class="panel-title">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  Evidence Timeline
+                </h2>
                 <p class="panel-kicker">Scan progression and findings</p>
               </div>
             </div>
@@ -1129,7 +1039,10 @@
           <section class="panel" style="animation-delay: 0.35s">
             <div class="panel-header">
               <div>
-                <h2 class="panel-title">Recommendation Evidence Detail</h2>
+                <h2 class="panel-title">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  Recommendation Evidence Detail
+                </h2>
                 <p class="panel-kicker" id="recommendationDetailHeader">Click a work item to inspect details</p>
               </div>
             </div>
@@ -1144,7 +1057,10 @@
           <section class="panel" style="animation-delay: 0.4s">
             <div class="panel-header">
               <div>
-                <h2 class="panel-title">Recent Evidence Log</h2>
+                <h2 class="panel-title">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                  Recent Evidence Log
+                </h2>
                 <p class="panel-kicker">Raw signals matching selected item</p>
               </div>
             </div>
@@ -1512,7 +1428,7 @@
       
       let html = `
         <div class="slack-card" style="border-left-color: ${task.isStale ? 'var(--red)' : 'var(--green)'};">
-          <h3 style="display:flex; justify-content:space-between; align-items:center; margin-top:0; border-bottom: 1px solid var(--line); padding-bottom: 8px;">
+          <h3 style="display:flex; justify-content:space-between; align-items:center; margin-top:0; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
             <span>Recommendation: <strong style="color:var(--ink);">${escapeHtml(task.recommendation)}</strong></span>
             ${badge(task.confidence + "% Confidence", task.confidence >= 90 ? "green" : "amber")}
           </h3>
@@ -1623,7 +1539,7 @@
         btn.disabled = false;
         resetBtn.disabled = false;
         const currentIcon = $("scanButtonIcon");
-        if (currentIcon) currentIcon.outerHTML = '<span class="button-icon" id="scanButtonIcon" aria-hidden="true">▶</span>';
+        if (currentIcon) currentIcon.outerHTML = `<span class="button-icon" id="scanButtonIcon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>`;
         label.textContent = "Run Scan";
         dot.classList.remove("scanning");
       }
