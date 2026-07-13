@@ -874,7 +874,7 @@
             <div>
               <h2 class="panel-title">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                Repository Health
+                Repository Overview
               </h2>
               <p class="panel-kicker">Real-time health score</p>
             </div>
@@ -981,43 +981,55 @@
         </section>
 
         <div class="right-stack">
+          <!-- 1. Repository Status -->
           <section class="panel" style="animation-delay: 0.2s">
             <div class="panel-header">
               <div>
                 <h2 class="panel-title">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
-                  Integration Status
+                  Repository Status
                 </h2>
-                <p class="panel-kicker">Live readiness snapshot</p>
+                <p class="panel-kicker">Live connections snapshot</p>
               </div>
             </div>
             <div class="status-list" id="integrationStatus">
-              <div class="empty-state">
-                <span class="empty-icon">🔌</span>
-                Checking integrations…
-              </div>
+              <div class="empty-state">Checking integrations…</div>
             </div>
           </section>
 
+          <!-- 2. Engineering Insights -->
+          <section class="panel" style="animation-delay: 0.22s">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                  Engineering Insights
+                </h2>
+                <p class="panel-kicker" id="insightsHeader">Scope details of select work item</p>
+              </div>
+            </div>
+            <div class="status-list" id="engineeringInsights">
+              <div class="empty-state">Select a work item row to view operational insights.</div>
+            </div>
+          </section>
+
+          <!-- 3. Recommendation Detail -->
           <section class="panel" style="animation-delay: 0.25s">
             <div class="panel-header">
               <div>
                 <h2 class="panel-title">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
-                  Live Event Feed
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  Recommendation Detail
                 </h2>
-                <p class="panel-kicker">Context → evidence → action trail</p>
+                <p class="panel-kicker" id="recommendationDetailHeader">Click a work item to inspect details</p>
               </div>
-              <span class="badge blue" id="lastEventAt">No events</span>
             </div>
-            <div class="feed-list" id="eventFeed">
-              <div class="empty-state">
-                <span class="empty-icon">📡</span>
-                No runtime events captured yet.
-              </div>
+            <div class="alert-preview" id="alertPreview">
+              <div class="empty-state">Select a work item row to view supporting evidence and verification state.</div>
             </div>
           </section>
 
+          <!-- 4. Evidence Timeline -->
           <section class="panel" style="animation-delay: 0.3s">
             <div class="panel-header">
               <div>
@@ -1025,53 +1037,31 @@
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                   Evidence Timeline
                 </h2>
-                <p class="panel-kicker">Scan progression and findings</p>
+                <p class="panel-kicker">Correlated code execution pipeline</p>
               </div>
             </div>
             <div class="timeline" id="timeline">
-              <div class="empty-state">
-                <span class="empty-icon">🔍</span>
-                Evidence timeline appears after a scan.
-              </div>
+              <div class="empty-state">Evidence timeline appears after a scan.</div>
             </div>
           </section>
 
+          <!-- 5. Recent Repository Activity -->
           <section class="panel" style="animation-delay: 0.35s">
             <div class="panel-header">
               <div>
                 <h2 class="panel-title">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                  Recommendation Evidence Detail
-                </h2>
-                <p class="panel-kicker" id="recommendationDetailHeader">Click a work item to inspect details</p>
-              </div>
-            </div>
-            <div class="alert-preview" id="alertPreview">
-              <div class="empty-state">
-                <span class="empty-icon">💬</span>
-                Select a work item row to view supporting evidence and verification state.
-              </div>
-            </div>
-          </section>
-
-          <section class="panel" style="animation-delay: 0.4s">
-            <div class="panel-header">
-              <div>
-                <h2 class="panel-title">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                  Recent Evidence Log
+                  Recent Repository Activity
                 </h2>
-                <p class="panel-kicker">Raw signals matching selected item</p>
+                <p class="panel-kicker">Raw matched signals and log files</p>
               </div>
             </div>
             <div class="evidence-list" id="evidenceList">
-              <div class="empty-state">
-                <span class="empty-icon">📂</span>
-                No evidence logs selected.
-              </div>
+              <div class="empty-state">No evidence logs selected.</div>
             </div>
           </section>
         </div>
+
       </section>
     </main>
   </div>
@@ -1148,11 +1138,16 @@
     /* ─── Scan progress steps (feels intelligent) ─── */
     const SCAN_STEPS = [
       "Connecting to GitHub…",
+      "Loading Repository…",
       "Fetching Pull Requests…",
-      "Searching Slack conversations…",
-      "Correlating engineering evidence…",
-      "Generating recommendations…",
-      "Repository synchronized."
+      "Loading Recent Commits…",
+      "Reading Planning State…",
+      "Searching Slack RTS…",
+      "Building Evidence…",
+      "Finding Mismatches…",
+      "Generating Recommendations…",
+      "Preparing Block Kit…",
+      "Scan Complete"
     ];
 
     function showScanProgress() {
@@ -1172,20 +1167,25 @@
         const el = document.getElementById(`scan-step-${current}`);
         if (el) { el.classList.add("active"); }
 
-        // Update signal nodes
-        if (current === 0) setSignalStates(["scanning", "waiting", "waiting", "waiting"]);
-        if (current === 1) setSignalStates(["scanning", "waiting", "waiting", "waiting"]);
-        if (current === 2) setSignalStates(["done", "scanning", "waiting", "waiting"]);
-        if (current === 3) setSignalStates(["done", "scanning", "waiting", "waiting"]);
-        if (current === 4) setSignalStates(["done", "done", "scanning", "waiting"]);
-        if (current >= 5) setSignalStates(["done", "done", "done", "done"]);
+        // Update signal nodes based on the 11 steps
+        if (current >= 0 && current <= 3) {
+          setSignalStates(["waiting", "scanning", "waiting", "waiting"]);
+        } else if (current === 4) {
+          setSignalStates(["scanning", "done", "waiting", "waiting"]);
+        } else if (current === 5) {
+          setSignalStates(["done", "done", "scanning", "waiting"]);
+        } else if (current >= 6 && current <= 9) {
+          setSignalStates(["done", "done", "done", "scanning"]);
+        } else {
+          setSignalStates(["done", "done", "done", "done"]);
+        }
 
         // Update status pill text
         $("scanState").textContent = SCAN_STEPS[current].replace("…", "");
 
         current++;
         if (current < SCAN_STEPS.length && state.scanning) {
-          setTimeout(advanceStep, 400 + Math.random() * 250);
+          setTimeout(advanceStep, 350 + Math.random() * 200);
         }
       }
       advanceStep();
@@ -1410,6 +1410,54 @@
       $("recommendationDetailHeader").textContent = `Supporting evidence for: "${task.title}"`;
       renderAlert(task);
       renderEvidenceLogs(task);
+
+      // 1. Update Engineering Insights Panel
+      const insightsContainer = $("engineeringInsights");
+      if (insightsContainer) {
+        const riskLabel = task.isStale ? "HIGH (Out of Sync)" : "LOW (Aligned)";
+        const riskTone = task.isStale ? "red" : "green";
+        insightsContainer.innerHTML = `
+          <div class="status-row"><b>Correlation Risk</b><span>${badge(riskLabel, riskTone)}</span></div>
+          <div class="status-row"><b>Feature Lead</b><span>${badge(task.owner, "blue")}</span></div>
+          <div class="status-row"><b>Last Activity</b><span>${badge(task.last_activity || "Today", "blue")}</span></div>
+          <div class="status-row"><b>Affected Scope</b><span>${badge((task.affected_files || []).length + " file(s)", "blue")}</span></div>
+        `;
+      }
+
+      // 2. Update Evidence Timeline (Feature-specific pipeline steps)
+      const timelineContainer = $("timeline");
+      if (timelineContainer) {
+        timelineContainer.innerHTML = `
+          <div class="timeline-row" style="animation-delay: 0.05s">
+            <span class="timeline-pin" style="background:var(--blue); box-shadow:0 0 0 3px var(--blue-soft);"></span>
+            <div>
+              <h3>Feature Commit Pushed</h3>
+              <p>"${escapeHtml(task.latest_commit_msg || "Initial checkin")}" by ${escapeHtml(task.owner)}</p>
+            </div>
+          </div>
+          <div class="timeline-row" style="animation-delay: 0.1s">
+            <span class="timeline-pin" style="background:var(--blue); box-shadow:0 0 0 3px var(--blue-soft);"></span>
+            <div>
+              <h3>GitHub Execution Checked</h3>
+              <p>Branch status verified as <strong>${escapeHtml(task.githubStatus.toUpperCase())}</strong></p>
+            </div>
+          </div>
+          <div class="timeline-row" style="animation-delay: 0.15s">
+            <span class="timeline-pin" style="background:var(--blue); box-shadow:0 0 0 3px var(--blue-soft);"></span>
+            <div>
+              <h3>Slack RTS Correlated</h3>
+              <p>Found ${task.evidenceCount} correlated conversation context clue(s)</p>
+            </div>
+          </div>
+          <div class="timeline-row" style="animation-delay: 0.2s">
+            <span class="timeline-pin" style="background:var(--green); box-shadow:0 0 0 3px var(--green-soft);"></span>
+            <div>
+              <h3>Sightline Decision</h3>
+              <p>${escapeHtml(task.recommendation)} (${task.confidence}% confidence)</p>
+            </div>
+          </div>
+        `;
+      }
     }
 
     function renderAlert(task) {
@@ -1419,49 +1467,102 @@
         return;
       }
 
-      // Checkmarks list
       const chkGit = task.github_matched ? "✔" : "✘";
       const chkSlack = task.slack_matched ? "✔" : "✘";
       const chkPlan = task.planning_matched ? "✔" : "✘";
 
-      const recTone = task.recommendation.startsWith("Update") ? "red" : task.recommendation.startsWith("Track") ? "amber" : "green";
-      
-      let html = `
-        <div class="slack-card" style="border-left-color: ${task.isStale ? 'var(--red)' : 'var(--green)'};">
-          <h3 style="display:flex; justify-content:space-between; align-items:center; margin-top:0; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
-            <span>Recommendation: <strong style="color:var(--ink);">${escapeHtml(task.recommendation)}</strong></span>
-            ${badge(task.confidence + "% Confidence", task.confidence >= 90 ? "green" : "amber")}
-          </h3>
+      const filesHtml = (task.affected_files || []).map(f => `<code style="display:inline-block; font-size:10.5px; color:#475569; padding:2px 6px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:4px; margin:2px 2px 0 0;">${escapeHtml(f)}</code>`).join("");
 
-          <div style="margin: 12px 0;">
-            <strong style="font-size:12px; display:block; margin-bottom:4px; color: var(--ink);">Reasoning Summary:</strong>
-            <p style="margin:0; font-size:12px; line-height:1.45; color: var(--muted); font-style: italic;">
-              "${escapeHtml(task.reason || "All planning status variables align with repository metadata. No staleness detected.")}"
-            </p>
+      const actionText = task.recommendation === "No action" ? "Alignment Verified" : `Proposed Update: ${task.recommendation}`;
+      const actionTone = task.recommendation === "No action" ? "green" : "purple";
+
+      let html = `
+        <div class="copilot-panel" style="border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+          <!-- Top Gradient Banner -->
+          <div style="background: linear-gradient(135deg, #6366f1, #a855f7); padding: 12px 16px; color: #ffffff; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#ffffff;"><path d="M12 2a10 10 0 0 1 7.54 16.59l-1.42-1.42A8 8 0 1 0 12 20v2a10 10 0 0 1 0-20z"/><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/></svg>
+              <span style="font-weight: 700; font-size: 12px; letter-spacing: 0.5px; text-transform: uppercase;">Copilot Enterprise AI</span>
+            </div>
+            ${badge(task.confidence + "% Confidence", "white")}
           </div>
 
-          <table style="width:100%; border-collapse:collapse; margin-top:12px; min-width:unset;">
-            <thead>
-              <tr style="background:transparent;"><th style="padding:4px 0; border-bottom:1px solid #edf0ee;">Evidence Source</th><th style="padding:4px 0; border-bottom:1px solid #edf0ee; text-align:right;">State</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="padding:6px 0; border-bottom:1px solid #edf0ee;">GitHub Pull Request [${chkGit}]</td>
-                <td style="padding:6px 0; border-bottom:1px solid #edf0ee; text-align:right; font-weight:600;">${escapeHtml(task.githubStatus.toUpperCase())}</td>
-              </tr>
-              <tr>
-                <td style="padding:6px 0; border-bottom:1px solid #edf0ee;">Slack Conversation [${chkSlack}]</td>
-                <td style="padding:6px 0; border-bottom:1px solid #edf0ee; text-align:right; font-weight:600;">${task.evidenceCount} permalinked log(s)</td>
-              </tr>
-              <tr>
-                <td style="padding:6px 0; border-bottom:0;">Planning List [${chkPlan}]</td>
-                <td style="padding:6px 0; border-bottom:0; text-align:right; font-weight:600;">${escapeHtml(task.status.toUpperCase())}</td>
-              </tr>
-            </tbody>
-          </table>
+          <!-- Content Padding -->
+          <div style="padding: 16px; display: grid; gap: 14px;">
+            <!-- AI Recommendation & Meter -->
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--muted);">AI Recommendation</span>
+                <span style="font-size: 11.5px; font-weight: 700; color: var(--purple);">${escapeHtml(actionText)}</span>
+              </div>
+              <!-- Confidence Meter -->
+              <div style="height: 6px; width: 100%; background: #f1f5f9; border-radius: 99px; overflow: hidden; position: relative;">
+                <div style="height: 100%; width: ${task.confidence}%; background: linear-gradient(90deg, #6366f1, #a855f7); border-radius: 99px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+              </div>
+            </div>
 
-          <div style="border-top:1px solid #edf0ee; margin-top:12px; padding-top:8px; font-size:11px; color: var(--muted); line-height:1.4;">
-            ℹ️ <em>Sightline correlated GitHub activity, Slack communication, and planning state to produce this evidence-backed recommendation.</em>
+            <!-- Engineering Summary -->
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 10px;">
+              <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px;">Engineering Summary</span>
+              <p style="margin: 0; font-size: 12px; line-height: 1.45; color: var(--ink);">${escapeHtml(task.description)}</p>
+            </div>
+
+            <!-- Verification Matrix -->
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 10px;">
+              <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px;">Evidence Sources Matrix</span>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+                <div style="background: ${task.github_matched ? '#f0fdf4' : '#f8fafc'}; border: 1px solid ${task.github_matched ? '#bbf7d0' : '#e2e8f0'}; padding: 6px; border-radius: 6px; text-align: center;">
+                  <b style="font-size: 12px; color: ${task.github_matched ? '#166534' : '#64748b'};">${chkGit} GitHub PR</b>
+                  <span style="display: block; font-size: 9.5px; color: var(--muted); margin-top: 2px;">${escapeHtml(task.githubStatus.toUpperCase())}</span>
+                </div>
+                <div style="background: ${task.slack_matched ? '#f0fdf4' : '#f8fafc'}; border: 1px solid ${task.slack_matched ? '#bbf7d0' : '#e2e8f0'}; padding: 6px; border-radius: 6px; text-align: center;">
+                  <b style="font-size: 12px; color: ${task.slack_matched ? '#166534' : '#64748b'};">${chkSlack} Slack Search</b>
+                  <span style="display: block; font-size: 9.5px; color: var(--muted); margin-top: 2px;">${task.evidenceCount} context clue(s)</span>
+                </div>
+                <div style="background: ${task.planning_matched ? '#f0fdf4' : '#fef2f2'}; border: 1px solid ${task.planning_matched ? '#bbf7d0' : '#fca5a5'}; padding: 6px; border-radius: 6px; text-align: center;">
+                  <b style="font-size: 12px; color: ${task.planning_matched ? '#166534' : '#991b1b'};">${chkPlan} Planning</b>
+                  <span style="display: block; font-size: 9.5px; color: var(--muted); margin-top: 2px;">${escapeHtml(task.status.toUpperCase())}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Affected Repository Scope -->
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 10px;">
+              <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px;">Repository Files Scope</span>
+              <div style="margin-top: 4px;">
+                ${filesHtml || '<span style="font-size: 11px; color:var(--muted-light)">None mapped</span>'}
+              </div>
+            </div>
+
+            <!-- Recent Commit -->
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 10px;">
+              <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px;">Recent Commit</span>
+              <code style="display: block; font-size: 11px; color: #0f172a; padding: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; line-height: 1.35; font-family: var(--font-mono);">
+                ${escapeHtml(task.latest_commit_msg || "Initial checkin")}
+              </code>
+            </div>
+
+            <!-- Risk & Downstream Impact -->
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px;">Operational Risk</span>
+                <span style="font-size: 12px; font-weight: 600; color: ${task.isStale ? 'var(--red)' : 'var(--green)'};">
+                  ${task.isStale ? '⚠️ Critical Desync Risk' : '✓ Status Fully Synced'}
+                </span>
+              </div>
+              <div>
+                <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px;">Sprint Impact</span>
+                <span style="font-size: 11.5px; color: var(--ink);">
+                  ${task.isStale ? 'Blocks board accuracy metrics' : 'Maintains tracking alignment'}
+                </span>
+              </div>
+            </div>
+
+            <!-- Detailed Reasoning Timeline -->
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 10px; font-size: 11px; color: var(--muted); line-height: 1.45;">
+              <strong style="color: var(--ink); display: block; margin-bottom: 4px; text-transform: uppercase; font-size: 10px;">AI Reasoning Timeline</strong>
+              <em>"${escapeHtml(task.reason || "All planning status variables align with repository metadata. No staleness detected.")}"</em>
+            </div>
           </div>
         </div>
       `;
